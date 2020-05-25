@@ -12,11 +12,12 @@
             Material is a design system – backed by open-source code –
             <br />that helps teams build high-quality digital experiences.
           </p>
-          <div class="d-flex" style="width:40%;">
-            <v-text-field class="mr-5" placeholder="Search for wonderful books." solo></v-text-field>
-            <v-btn large>
-              <span class="darkest-text font-weight-regular text-capitalize">Search books</span>
-              <v-icon right>mdi-magnify</v-icon>
+          <div class="d-flex justify-center" style="width:50%;">
+            <input type="text" class="search-input-box" placeholder="Search for wonderful books." />
+
+            <v-btn large class="darkest-background">
+              <span class="lighter-text font-weight-regular text-capitalize">Search books</span>
+              <v-icon right class="lighter-text font-weight-regular">mdi-magnify</v-icon>
             </v-btn>
           </div>
         </v-col>
@@ -41,5 +42,14 @@ export default {
 
 .book-icon {
   font-size: 2.5rem;
+}
+.search-input-box {
+  width: 50%;
+  opacity: 0.5;
+  border: 2px solid #e0e1dd;
+  color: white;
+  border-radius: 5px;
+  margin-right: 10px;
+  padding: 10px;
 }
 </style>

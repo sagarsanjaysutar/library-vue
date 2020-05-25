@@ -13,7 +13,7 @@
         </p>
       </v-col>
     </v-row>
-    <v-row>
+    <v-row class="new-book-row">
       <v-col cols="3" v-for="i in 10" :key="i.id">
         <bookCard />
       </v-col>
@@ -32,6 +32,13 @@ export default {
 </script>
 
 <style>
+.new-book-row {
+  align-self: center;
+  width: 90% !important;
+}
+.y {
+  flex-grow: 1;
+}
 .newBooks-container {
   height: 100%;
   display: flex;
