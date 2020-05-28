@@ -15,7 +15,7 @@
           <div class="d-flex justify-center" style="width:50%;">
             <input type="text" class="search-input-box" placeholder="Search for wonderful books." />
 
-            <v-btn large class="darkest-background">
+            <v-btn large class="darkest-background" to="/searchedResults">
               <span class="lighter-text font-weight-regular text-capitalize">Search books</span>
               <v-icon right class="lighter-text font-weight-regular">mdi-magnify</v-icon>
             </v-btn>
@@ -28,7 +28,12 @@
 
 <script>
 export default {
-  name: "searchBook"
+  name: "searchBook",
+  methods: {
+    // changePage() {
+    //   this.$router.push({ name: "searchedResults" });
+    // }
+  }
 };
 </script>
 

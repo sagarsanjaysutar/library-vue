@@ -14,8 +14,8 @@
       </v-col>
     </v-row>
     <v-row class="new-book-row">
-      <v-col cols="3" v-for="i in 10" :key="i.id">
-        <bookCard />
+      <v-col cols="3" v-for="book in books" :key="book.id">
+        <bookCard :bookDetails="book" />
       </v-col>
     </v-row>
   </v-container>
@@ -27,6 +27,11 @@ export default {
   name: "newBooksContainer",
   components: {
     bookCard
+  },
+  computed: {
+    books() {
+      return this.$store.state.books;
+    }
   }
 };
 </script>
