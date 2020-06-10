@@ -15,7 +15,7 @@ export const store = new vuex.Store({
                 quantity: 3
             },
             {
-                name: "ML",
+                name: "Machine Learning",
                 author: "Harsh",
                 coverPage: "D:\\Main\\Work\\Project\\Library\\Backend\\assests\\img\\c.jpg",
                 genere: "IT",

@@ -46,6 +46,7 @@ const booksScehma = new mongoose.Schema({
     name: String,
     author: String,
     coverPage: String,
+    genere: String,
     isIssued: Boolean,
     isReturned: Boolean,
     isReserved: Boolean,
@@ -53,15 +54,14 @@ const booksScehma = new mongoose.Schema({
 });
 
 const usersScehma = new mongoose.Schema({
-    userFirstName: String,
-    userLastName: String,
-
+    firstName: String,
+    lastName: String,
+    email: String,
+    password: String,
+    type: String
 });
 
-const employeesScehma = new mongoose.Schema({
-    userFirstName: String,
-    userLastName: String
-});
+
 
 const issuedBooks = mongoose.model("issuedBooksModel", issuedBooksScehma);
 const returnedBook = mongoose.model("returnedBookModel", returnedBooksScehma);
@@ -69,7 +69,7 @@ const reservedBook = mongoose.model("reservedBookModel", reservedBooksScehma);
 const penality = mongoose.model("penalityModel", penalitysScehma);
 const userModel = mongoose.model("userModel", usersScehma);
 const bookModel = mongoose.model("bookmodel", booksScehma);
-const employeeModel = mongoose.model("employeemodel", employeesScehma);
+
 
 module.exports = {
     issuedBooks,
@@ -78,7 +78,7 @@ module.exports = {
     penality,
     reservedBook,
     bookModel,
-    employeeModel
+
 }
 
 

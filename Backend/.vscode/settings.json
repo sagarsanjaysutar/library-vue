@@ -1,0 +1,9 @@
+{
+    "mongoRunner": {
+        "connections": [{
+            "name": "MongoDB",
+            "url": "mongodb://localhost:27017/"
+        }]
+    },
+    "editor.minimap.enabled": false
+}
