@@ -61,6 +61,20 @@ const usersScehma = new mongoose.Schema({
     type: String
 });
 
+const issueReturnInfoSchema = new mongoose.Schema({
+    issuedOn: Date,
+    issuedTo: String,
+    issuedBook: String,
+    issuedBy: String,
+    dueDate: Date,
+    returnedOn: Date,
+    returnedTo: String,
+    overDueDays: Number,
+    penalityAmount: Number,
+    penalityPaidStatus: Boolean
+
+})
+
 
 
 const issuedBooks = mongoose.model("issuedBooksModel", issuedBooksScehma);
@@ -69,6 +83,7 @@ const reservedBook = mongoose.model("reservedBookModel", reservedBooksScehma);
 const penality = mongoose.model("penalityModel", penalitysScehma);
 const userModel = mongoose.model("userModel", usersScehma);
 const bookModel = mongoose.model("bookmodel", booksScehma);
+const issueReturnInfo = mongoose.model("issueReturnInfo", issueReturnInfoSchema)
 
 
 module.exports = {
@@ -78,7 +93,7 @@ module.exports = {
     penality,
     reservedBook,
     bookModel,
-
+    issueReturnInfo
 }
 
 
