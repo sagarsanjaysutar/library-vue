@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import home from '../views/home.vue'
-import contact from "../views/contact.vue"
-import about from "../views/about.vue"
-import searchedResults from "../views/searchedResults.vue"
+import home from '../components/home.vue'
+import contact from "../components/contact.vue"
+import about from "../components/about.vue"
+import searchedResults from "../components/book/searchedResults.vue"
 
 
 Vue.use(VueRouter)

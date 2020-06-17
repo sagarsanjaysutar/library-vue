@@ -1,53 +1,80 @@
 const express = require("express");
 var mongoose = require('mongoose');
 const bodyParser = require("body-parser")
+const cors = require('cors');
 const {
     bookModel,
     userModel,
     issueReturnInfo
 } = require("./models/models");
 
-
-
 const app = express()
 app.use(bodyParser.json())
-
+app.use(cors({
+    origin: ['http://localhost:8080', 'http://localhost:8081']
+}))
 const port = "9090"
 const fineAmount = 10;
 
-
-
-
-app.get("/get-searched-book", (
+app.get("/getBooks", (
     req, res) => {
-
-    const searchedTerm = req.query.name
-    console.log("Searching book " + searchedTerm + " in db.")
-    const searchedBooks = bookModel.find({
-        $or: [{
-                name: searchedTerm
-            },
-            {
-                author: searchedTerm
-            },
-            {
-                genere: searchedTerm
+    const getNewBooks = req.query.getNewBooks;
+    const searchedTerm = req.query.searchedTerm
+    if (getNewBooks) {
+        console.log("Searching for new books.")
+        const newBooks = bookModel.find().limit(4)
+        newBooks.then(result => {
+            if (result) {
+                console.log("Found " + result.length + " new books.")
+                res.send(result)
+            } else {
+                console.log("No new books found!!")
+                res.sendStatus(404)
             }
-        ]
-    }).exec()
 
-    searchedBooks.then(result => {
-        if (result) {
-            console.log("Found " + result.length + " containing term " + searchedTerm)
-            res.send(result)
-        } else {
-            console.log(result + " not found!!")
-            res.sendStatus(404)
-        }
+        }).catch(err => {
+            console.log("Error in fetching new books. \n -- " + err)
+        })
 
-    }).catch(err => {
-        console.log("Erro in finding searched book \n -- " + err)
-    })
+    } else if (searchedTerm != "" || !searchedTerm != undefined) {
+        console.log("Searching book " + searchedTerm + " in db.")
+        const searchedBooks = bookModel.find({
+            $or: [{
+                    "name": {
+                        $regex: ".*" + searchedTerm + ".*"
+                    }
+                },
+                {
+                    "author": {
+                        $regex: ".*" + searchedTerm + ".*"
+                    }
+                },
+                {
+                    "genere": {
+                        $regex: ".*" + searchedTerm + ".*"
+                    }
+                }
+            ]
+        }).exec()
+
+        searchedBooks.then(result => {
+            if (result) {
+                console.log("Found " + result.length + " containing term " + searchedTerm)
+                res.send(result)
+            } else {
+                console.log(result + " not found!!")
+                res.sendStatus(404)
+            }
+
+        }).catch(err => {
+            console.log("Error in finding searched book. \n -- " + err)
+        })
+
+    } else {
+        res.status(406).send({
+            status: "Error in fetching books. \n" + err
+        })
+    }
 })
 
 app.post("/add-books", (req, res) => {
@@ -258,10 +285,7 @@ app.post("/return-book", (req, res) => {
     })
 })
 
-
 function checkPenalty(dueDate, today) {
-
-
     var overDueDays = today.getDate() - dueDate.getDate()
     if (overDueDays > 0) {
         var totalFine = overDueDays * fineAmount;

@@ -14,7 +14,7 @@
       </v-col>
     </v-row>
     <v-row class="new-book-row">
-      <v-col cols="3" v-for="book in books" :key="book.id">
+      <v-col cols="3" v-for="book in fetchNewBooks" :key="book.id">
         <bookCard :bookDetails="book" />
       </v-col>
     </v-row>
@@ -25,12 +25,24 @@
 import bookCard from "./bookCard";
 export default {
   name: "newBooksContainer",
+  data: () => {
+    return {
+      newBooks: []
+    };
+  },
   components: {
     bookCard
   },
+  beforeCreate(){    
+      this.$store.dispatch("fetchBooks", {
+        searchedTerm: "",
+        getNewBooks: true
+      })
+  },
   computed: {
-    books() {
-      return this.$store.state.books;
+    fetchNewBooks(){
+   
+      return this.$store.state.newBooks;
     }
   }
 };

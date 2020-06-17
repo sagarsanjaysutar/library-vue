@@ -1,7 +1,14 @@
 import vue from "vue"
 import vuex from "vuex"
+import {
+    get,
+} from 'axios';
+
+const url = 'http://localhost:9090';
 
 vue.use(vuex);
+
+
 
 export const store = new vuex.Store({
     state: {
@@ -41,7 +48,41 @@ export const store = new vuex.Store({
                 isReserved: true,
                 quantity: 1
             }
-        ]
+        ],
+        searchedBooks: [],
+        newBooks: []
+    },
+    actions: {
+        async fetchBooks(context, {
+            searchedTerm,
+            getNewBooks
+        }) {
+            console.log("fetchBook parameter :- " + getNewBooks + ", " + searchedTerm)
+            if (getNewBooks) {
+                await get(`${url}/getBooks`, {
+                    params: {
+                        "getNewBooks": true
+                    }
+                }).then(resp => {
+                    console.log("Successfully got " + resp.data.length + " new books.")
+                    this.state.newBooks = resp.data
+                }).catch(err => {
+                    console.log("Error in fetching searched books. \n-" + err)
+                })
+
+            } else {
+                await get(`${url}/getBooks`, {
+                    params: {
+                        "searchedTerm": searchedTerm
+                    }
+                }).then(resp => {
+                    console.log("Successfully found " + resp.data.length + " books with search keyword : " + searchedTerm + ".")
+                    this.state.searchedBooks = resp.data
+                }).catch(err => {
+                    console.log("Error in fetching searched books. \n-" + err)
+                })
+            }
+        }
     }
 });
 
