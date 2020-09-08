@@ -5,7 +5,7 @@ const authRoute = require("./Authentication/auth");
 const books = require("./Books/books");
 
 const app = express();
-
+app.use(bodyParser.json());
 app.use(cors({ origin: ["http://localhost:8080", "http://localhost:8081"] }));
 
 const port = "9090";

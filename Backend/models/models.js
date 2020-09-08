@@ -26,8 +26,8 @@ const booksScehma = new mongoose.Schema({
 });
 
 const usersScehma = new mongoose.Schema({
-  firstName: String,
-  lastName: String,
+  id:String,
+  name: String,  
   email: String,
   password: String,
   type: String,

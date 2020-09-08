@@ -1,11 +1,13 @@
 <template>
-  <v-container fluid class="darker-background pa-5">
+  <v-container fluid class="primaryLight pa-5">
     <v-row style="height: 60vh">
       <v-col cols="12" class="flex-center">
-        <v-icon class="lighter-text text-center font-weight-regular" size="5rem"
+        <v-icon
+          class="secondaryLight--text text-center font-weight-regular"
+          size="5rem"
           >mdi-book-open-variant</v-icon
         >
-        <h1 class="lighter-text text-center font-weight-light mb-2">
+        <h1 class="secondaryLight--text text-center font-weight-light mb-2">
           Search for books.
         </h1>
 
@@ -20,7 +22,7 @@
           >
             <template v-slot:append>
               <v-btn type="submit" icon class="darkest-background">
-                <v-icon class="lighter-text font-weight-regular"
+                <v-icon class="secondaryLight--text font-weight-regular"
                   >mdi-magnify</v-icon
                 >
               </v-btn>
@@ -28,22 +30,22 @@
           </v-text-field>
         </v-form>
 
-        <p class="lighter-text text-center mt-5">
+        <p class="secondaryLight--text text-center mt-5">
           Material is a design system – backed by open-source code.
         </p>
       </v-col>
     </v-row>
-    <v-row class="darkest-background pt-5">
+    <v-row class="primary pt-5">
       <v-col cols="12" class="flex-center">
         <v-icon
-          class="lighter-text text-center font-weight-regular"
+          class="secondaryLight--text text-center font-weight-regular"
           size="2.5rem"
           >mdi-book-open-variant</v-icon
         >
-        <h1 class="lighter-text text-center font-weight-light mb-2">
+        <h1 class="secondaryLight--text text-center font-weight-light mb-2">
           New books in library.
         </h1>
-        <p class="lighter-text text-center">
+        <p class="secondaryLight--text text-center">
           Material is a design system – backed by open-source code –
           <br />that helps teams build high-quality digital experiences.
         </p>
@@ -63,7 +65,7 @@ export default {
   data: () => {
     return {
       searchedTerm: "",
-      isLoginContainerOpen: false,
+     
     };
   },
   methods: {

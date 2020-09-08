@@ -7,12 +7,11 @@ import { store } from "./store/store";
 Vue.config.productionTip = false;
 
 router.beforeEach(({ path }, from, next) => {
-  console.log(path);
   const publicPages = ["/", "/searchedResults", "/about", "/contact"];
   const privatePages = ["/dashboard"];
   const isPrivatePage = privatePages.includes(path);
   if (isPrivatePage) {
-    const token = store.state.userInfo.token || "";
+    const token = store.state.userInfo.accessToken || "";
     if (token === "") {
       return next("/");
     }

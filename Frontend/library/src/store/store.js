@@ -1,21 +1,28 @@
 import vue from "vue";
 import vuex from "vuex";
 import axios from "axios";
+import createPersistedState from "vuex-persistedstate";
 
 vue.use(vuex);
 axios.defaults.baseURL = "http://localhost:9090";
 
 export const store = new vuex.Store({
+  plugins: [createPersistedState()],
   state: {
     books: [],
     searchedBooks: [],
     newBooks: [],
-    status: "",
+    status: {},
     userInfo: {},
   },
   mutations: {
     setStatus(state, status) {
-      state.status = status;
+      state.status = {
+        value: status,
+      };
+    },
+    setUserInfo(state, userInfo) {
+      state.userInfo = userInfo;
     },
     setSearchedBook(state, searchedBooks) {
       state.searchedBooks = searchedBooks;
@@ -63,7 +70,7 @@ export const store = new vuex.Store({
         .post("/login", data)
         .then((response) => {
           if (response.status === 200) {
-            commit("userInfo", response.data);
+            commit("setUserInfo", response.data);
             return response.status;
           } else {
             commit("setStatus", response.data);
@@ -73,6 +80,27 @@ export const store = new vuex.Store({
         .catch((err) => {
           commit("setStatus", err);
         });
+    },
+    register({ commit }, userInfo) {
+      console.log(userInfo);
+      const body = userInfo;
+      axios
+        .post("/register", body)
+        .then((response) => {
+          if (response.status === 200) {
+            commit("setStatus", response.data.status);
+          } else {
+            commit("setStatus", response.data.status);
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          commit("setStatus", err);
+        });
+    },
+    logout({ commit }) {
+      commit("setUserInfo", {});
+      return true;
     },
   },
 });
