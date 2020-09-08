@@ -1,97 +1,78 @@
-import vue from "vue"
-import vuex from "vuex"
-import {
-    get,
-} from 'axios';
-
-const url = 'http://localhost:9090';
+import vue from "vue";
+import vuex from "vuex";
+import axios from "axios";
 
 vue.use(vuex);
-
-
+axios.defaults.baseURL = "http://localhost:9090";
 
 export const store = new vuex.Store({
-    state: {
-        books: [{
-                name: "UI",
-                author: "Miri",
-                coverPage: "D:\\Main\\Work\\Project\\Library\\Backend\\assests\\img\\a.jpg",
-                genere: "IT",
-                isIssued: true,
-                isReserved: false,
-                quantity: 3
-            },
-            {
-                name: "Machine Learning",
-                author: "Harsh",
-                coverPage: "D:\\Main\\Work\\Project\\Library\\Backend\\assests\\img\\c.jpg",
-                genere: "IT",
-                isIssued: false,
-                isReserved: true,
-                quantity: 5
-            },
-            {
-                name: "Cyber",
-                author: "Vineet",
-                coverPage: "D:\\Main\\Work\\Project\\Library\\Backend\\assests\\img\\b.png",
-                genere: "IT",
-                isIssued: false,
-                isReserved: false,
-                quantity: 10
-            },
-            {
-                name: "IOT",
-                author: "Sagar",
-                coverPage: "D:\\Main\\Work\\Project\\Library\\Backend\\assests\\img\\a.jpg",
-                genere: "IT",
-                isIssued: true,
-                isReserved: true,
-                quantity: 1
-            }
-        ],
-        searchedBooks: [],
-        newBooks: []
+  state: {
+    books: [],
+    searchedBooks: [],
+    newBooks: [],
+    status: "",
+    userInfo: {},
+  },
+  mutations: {
+    setStatus(state, status) {
+      state.status = status;
     },
-    actions: {
-        async fetchBooks(context, {
-            searchedTerm,
-            getNewBooks
-        }) {
-            console.log("fetchBook parameter :- " + getNewBooks + ", " + searchedTerm)
-            if (getNewBooks) {
-                await get(`${url}/getBooks`, {
-                    params: {
-                        "getNewBooks": true
-                    }
-                }).then(resp => {
-                    console.log("Successfully got " + resp.data.length + " new books.")
-                    this.state.newBooks = resp.data
-                }).catch(err => {
-                    console.log("Error in fetching searched books. \n-" + err)
-                })
-
-            } else {
-                await get(`${url}/getBooks`, {
-                    params: {
-                        "searchedTerm": searchedTerm
-                    }
-                }).then(resp => {
-                    console.log("Successfully found " + resp.data.length + " books with search keyword : " + searchedTerm + ".")
-                    this.state.searchedBooks = resp.data
-                }).catch(err => {
-                    console.log("Error in fetching searched books. \n-" + err)
-                })
-            }
-        }
-    }
+    setSearchedBook(state, searchedBooks) {
+      state.searchedBooks = searchedBooks;
+    },
+    setNewBook(state, newBooks) {
+      state.newBooks = newBooks;
+    },
+  },
+  actions: {
+    fetchBooks({ commit }, { searchedTerm, getNewBooks }) {
+      if (getNewBooks) {
+        axios
+          .get("/getBooks", { params: { getNewBooks: true } })
+          .then((resp) => {
+            let bookCount = resp.data.length;
+            console.log(
+              "Successfully got " + bookCount + " new books in store."
+            );
+            commit("setNewBook", resp.data);
+          })
+          .catch((err) => {
+            console.log("Error in fetching new books in store. \n-" + err);
+          });
+      } else {
+        axios
+          .get("/getBooks", { params: { searchedTerm: searchedTerm } })
+          .then((resp) => {
+            let bookCount = resp.data.length;
+            console.log(
+              "Successfully found " +
+                bookCount +
+                " books with search keyword : " +
+                searchedTerm +
+                "in store."
+            );
+            commit("setSearchedBook", resp.data);
+          })
+          .catch((err) => {
+            console.log("Error in fetching searched books. \n-" + err);
+          });
+      }
+    },
+    login({ commit }, data) {
+      return axios
+        .post("/login", data)
+        .then((response) => {
+          if (response.status === 200) {
+            commit("userInfo", response.data);
+            return response.status;
+          } else {
+            commit("setStatus", response.data);
+            return response.status;
+          }
+        })
+        .catch((err) => {
+          commit("setStatus", err);
+        });
+    },
+  },
 });
-
-// const booksScehma = new mongoose.Schema({
-//     name: String,
-//     author: String,
-//     coverPage: String,
-//     isIssued: Boolean,
-//     isReturned: Boolean,
-//     isReserved: Boolean,
-//     quantity: Number
-// });

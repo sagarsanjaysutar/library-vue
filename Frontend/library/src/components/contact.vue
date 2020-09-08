@@ -3,9 +3,12 @@
     <v-row>
       <v-col cols="12">
         <h1 class="lighter-text text-left">Contact us</h1>
-        <p
-          class="lighter-text"
-        >Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus nihil voluptas adipisci cum officiis, voluptatum ipsam perspiciatis, omnis ab quo odio? Necessitatibus illum magnam quisquam. Quam quas praesentium sed voluptates?</p>
+        <p class="lighter-text">
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus nihil
+          voluptas adipisci cum officiis, voluptatum ipsam perspiciatis, omnis
+          ab quo odio? Necessitatibus illum magnam quisquam. Quam quas
+          praesentium sed voluptates?
+        </p>
       </v-col>
     </v-row>
   </v-container>
@@ -13,12 +16,12 @@
 
 <script>
 export default {
-  name: "contact"
+  name: "contact",
 };
 </script>
 
 <style>
 .contact-container {
-  height: 70vh;
+  min-height: 100vh;
 }
 </style>

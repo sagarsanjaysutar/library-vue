@@ -1,107 +1,99 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-mongoose.connect("mongodb://localhost/library", {
-        useNewUrlParser: true,
-        useCreateIndex: true,
-        useUnifiedTopology: true
-    })
-    .then(function () {
-        console.log("Connected to DB successfully.");
-    })
-    .catch(function (err) {
-        console.log("Connection failed");
-    });
-
-const issuedBooksScehma = new mongoose.Schema({
-    issuedOn: Date,
-    issuedTo: String,
-    issuedBook: String,
-    issuedBy: String,
-    dueDate: Date
-});
-
-const returnedBooksScehma = new mongoose.Schema({
-    returnedOn: Date,
-    returnedTo: String,
-    returnedBook: String,
-    returnedBy: String
-});
-
-const reservedBooksScehma = new mongoose.Schema({
-    reservedOn: Date,
-    reservedBook: String,
-    reservedBy: String,
-});
-
-const penalitysScehma = new mongoose.Schema({
-    isPenalised: Boolean,
-    penalityTo: String,
-    penalityOf: Number,
-    penalityOn: Date,
-    penalityCollectedBy: String,
-    penalityOverDueDays: Number
-});
+mongoose
+  .connect("mongodb://localhost/library", {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
+  })
+  .then(function () {
+    console.log("Connected to DB successfully.");
+  })
+  .catch(function (err) {
+    console.log("Connection failed");
+  });
 
 const booksScehma = new mongoose.Schema({
-    name: String,
-    author: String,
-    coverPage: String,
-    genere: String,
-    isIssued: Boolean,
-    isReturned: Boolean,
-    isReserved: Boolean,
-    quantity: Number
+  name: String,
+  author: String,
+  coverPage: String,
+  genere: String,
+  isIssued: Boolean,
+  isReturned: Boolean,
+  isReserved: Boolean,
+  quantity: Number,
+  issuedQuantity: Number,
 });
 
 const usersScehma = new mongoose.Schema({
-    firstName: String,
-    lastName: String,
-    email: String,
-    password: String,
-    type: String
+  firstName: String,
+  lastName: String,
+  email: String,
+  password: String,
+  type: String,
 });
 
 const issueReturnInfoSchema = new mongoose.Schema({
-    issuedOn: Date,
-    issuedTo: String,
-    issuedBook: String,
-    issuedBy: String,
-    dueDate: Date,
-    returnedOn: Date,
-    returnedTo: String,
-    overDueDays: Number,
-    penalityAmount: Number,
-    penalityPaidStatus: Boolean
+  issuedOn: Date,
+  issuedTo: String,
+  issuedBook: String,
+  issuedBy: String,
+  dueDate: Date,
+  returnedOn: Date,
+  returnedTo: String,
+  overDueDays: Number,
+  penalityAmount: Number,
+  penalityPaidStatus: Boolean,
+});
 
-})
-
-
-
-const issuedBooks = mongoose.model("issuedBooksModel", issuedBooksScehma);
-const returnedBook = mongoose.model("returnedBookModel", returnedBooksScehma);
-const reservedBook = mongoose.model("reservedBookModel", reservedBooksScehma);
-const penality = mongoose.model("penalityModel", penalitysScehma);
 const userModel = mongoose.model("userModel", usersScehma);
 const bookModel = mongoose.model("bookmodel", booksScehma);
-const issueReturnInfo = mongoose.model("issueReturnInfo", issueReturnInfoSchema)
-
+const issueReturnInfo = mongoose.model(
+  "issueReturnInfo",
+  issueReturnInfoSchema
+);  
 
 module.exports = {
-    issuedBooks,
-    returnedBook,
-    userModel,
-    penality,
-    reservedBook,
-    bookModel,
-    issueReturnInfo
-}
+  userModel,
 
+  bookModel,
+  issueReturnInfo,
+};
 
+// const issuedBooksScehma = new mongoose.Schema({
+//     issuedOn: Date,
+//     issuedTo: String,
+//     issuedBook: String,
+//     issuedBy: String,
+//     dueDate: Date
+// });
 
+// const returnedBooksScehma = new mongoose.Schema({
+//     returnedOn: Date,
+//     returnedTo: String,
+//     returnedBook: String,
+//     returnedBy: String
+// });
 
+// const reservedBooksScehma = new mongoose.Schema({
+//     reservedOn: Date,
+//     reservedBook: String,
+//     reservedBy: String,
+// });
 
+// const penalitysScehma = new mongoose.Schema({
+//     isPenalised: Boolean,
+//     penalityTo: String,
+//     penalityOf: Number,
+//     penalityOn: Date,
+//     penalityCollectedBy: String,
+//     penalityOverDueDays: Number
+// });
 
-
+// const issuedBooks = mongoose.model("issuedBooksModel", issuedBooksScehma);
+// const returnedBook = mongoose.model("returnedBookModel", returnedBooksScehma);
+// const reservedBook = mongoose.model("reservedBookModel", reservedBooksScehma);
+// const penality = mongoose.model("penalityModel", penalitysScehma);
 
 //Old Scehma
 // const book = new mongoose.Schema({

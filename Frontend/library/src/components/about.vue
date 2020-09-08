@@ -4,8 +4,10 @@
       <v-col cols="12">
         <h1 class="lighter-text text-left">About us</h1>
         <p class="lighter-text">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus nihil voluptas adipisci cum officiis,
-          voluptatum ipsam perspiciatis, omnis ab quo odio? Necessitatibus illum magnam quisquam. Quam quas praesentium sed voluptates?
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus nihil
+          voluptas adipisci cum officiis, voluptatum ipsam perspiciatis, omnis
+          ab quo odio? Necessitatibus illum magnam quisquam. Quam quas
+          praesentium sed voluptates?
         </p>
       </v-col>
     </v-row>
@@ -14,12 +16,12 @@
 
 <script>
 export default {
-  name: "about"
+  name: "about",
 };
 </script>
 
 <style>
 .about-container {
-  height: 70vh;
+  min-height: 100vh;
 }
 </style>
