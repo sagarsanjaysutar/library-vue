@@ -1,9 +1,8 @@
 <template>
   <v-container class="primaryLight fill-height justify-center" fluid>
-    <v-card class="primary" width="90%">
-      <v-card-title>
-        <h2>Welcome, {{ userInfo.name }}</h2>
-      </v-card-title>
+    <v-card class="primaryLight" width="90%" elevation="0">
+      <v-card-title> Welcome, {{ userInfo.name }} </v-card-title>
+      <v-card-subtitle>Here are list of your books.</v-card-subtitle>
       <v-divider></v-divider>
       <v-card-title> Currently issued books. </v-card-title>
       <bookContainer :books="newBooks" />

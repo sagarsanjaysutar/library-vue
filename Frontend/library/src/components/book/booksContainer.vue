@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="darkest-background newBooks-container fill-height">
+  <v-container fluid class="newBooks-container fill-height">
     <v-row class="new-book-row">
       <v-col lg="3" v-for="book in books" :key="book.id" cols="6" class="pa-4">
         <bookCard :bookDetails="book" />
@@ -29,6 +29,7 @@ export default {
 }
 
 .newBooks-container {
+  background-color: transparent;
   height: 100%;
   display: flex;
   flex-direction: column;

@@ -6,6 +6,7 @@ const key = "KAD▓Nih_2q8enudina%d8H@D92q8d#$%^";
 
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
+  console.log("Login request recieved from "+ email)
   userModel
     .findOne({ email })
     .then((response) => {
@@ -20,6 +21,7 @@ router.post("/login", (req, res) => {
             userInfo.accessToken = jwt.sign(userInfo, key, {
               expiresIn: "23h",
             });
+            console.log("Login successfull.")
             res.status(200).send(userInfo);
           } else {
             res.status(200).send({ status: "Wrong password." });
@@ -36,6 +38,8 @@ router.post("/login", (req, res) => {
 
 module.exports = router;
 
+
+// Mihir's code
 // try {
 //   const { email, password } = req.body;
 

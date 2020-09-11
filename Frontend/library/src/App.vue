@@ -33,9 +33,27 @@
       </template>
     </v-snackbar>
     <nav>
-      <v-toolbar flat class="darkest-background">
+      <v-toolbar flat class="primary">
         <v-toolbar-title class="secondaryLight--text">Library</v-toolbar-title>
         <v-spacer></v-spacer>
+        <v-text-field
+          v-show="currentRoute !== '/'"
+          dark
+          background-color="primaryLight"
+          hide-details
+          solo
+          placeholder="Search for wonderful books."
+          v-model="searchedTerm"
+          @keyup.enter="getBooks"
+        >
+          <template v-slot:append>
+            <v-btn @click="getBooks" icon class="primaryLight">
+              <v-icon class="lighter-text font-weight-regular"
+                >mdi-magnify</v-icon
+              >
+            </v-btn>
+          </template>
+        </v-text-field>
         <v-tabs right style="width: 10%" slider-size="3">
           <v-tab
             class="secondaryLight--text font-weight-regular text-capitalize"
@@ -135,13 +153,13 @@
         </span>
       </v-toolbar>
     </nav>
-    <v-container fluid class="pa-0">
+    <v-container fluid class="pa-0" style="min-height: 90vh">
       <router-view></router-view>
     </v-container>
 
-    <v-footer dark padless>
-      <v-card class="flex" flat tile>
-        <v-card-title class="darker-background font-weight-regular">
+    <v-footer dark padless class="primary">
+      <v-card class="primary" width="100%" flat tile>
+        <v-card-title class="font-weight-regular">
           Get connected with us on social networks!
           <v-spacer></v-spacer>
 
@@ -170,6 +188,7 @@ export default {
   data: () => ({
     showLogOut: false,
     showLogin: false,
+    searchedTerm: "",
     icons: ["mdi-linkedin", "mdi-instagram"],
   }),
   methods: {
@@ -180,8 +199,21 @@ export default {
         this.$router.push("/");
       });
     },
+    getBooks() {
+      this.$store.dispatch("getBooks", { searchedTerm: this.searchedTerm });
+      this.$router.replace({
+        name: `searchedResults`,
+        query: { search: this.searchedTerm },
+      });
+    },
   },
+
   computed: {
+    currentRoute() {
+      const route = this.$router.currentRoute.fullPath;
+      console.log(route );
+      return route;
+    },
     status() {
       return this.$store.state.status;
     },

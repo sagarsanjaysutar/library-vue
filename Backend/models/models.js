@@ -14,19 +14,17 @@ mongoose
   });
 
 const booksScehma = new mongoose.Schema({
+  b_id:String,
   name: String,
   author: String,
   coverPage: String,
-  genere: String,
-  isIssued: Boolean,
-  isReturned: Boolean,
-  isReserved: Boolean,
-  quantity: Number,
+  genere: String, 
+  totalQuantity: Number,
   issuedQuantity: Number,
 });
 
 const usersScehma = new mongoose.Schema({
-  id:String,
+  u_id:String,
   name: String,  
   email: String,
   password: String,
@@ -34,11 +32,13 @@ const usersScehma = new mongoose.Schema({
 });
 
 const issueReturnInfoSchema = new mongoose.Schema({
+  t_id:String,
   issuedOn: Date,
   issuedTo: String,
   issuedBook: String,
   issuedBy: String,
   dueDate: Date,
+  dueDateExtensionNumber:Number, 
   returnedOn: Date,
   returnedTo: String,
   overDueDays: Number,

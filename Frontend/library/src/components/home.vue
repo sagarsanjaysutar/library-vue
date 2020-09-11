@@ -11,7 +11,7 @@
           Search for books.
         </h1>
 
-        <v-form @submit.prevent="fetchBooks()" class="search-form">
+        <v-form @submit.prevent="getBooks()" class="search-form">
           <v-text-field
             dark
             background-color="darkest-background"
@@ -69,7 +69,7 @@ export default {
     };
   },
   methods: {
-    fetchBooks() {
+    getBooks() {
       this.$router.push({
         name: `searchedResults`,
         query: { search: this.searchedTerm },
@@ -77,7 +77,7 @@ export default {
     },
   },
   created() {
-    this.$store.dispatch("fetchBooks", { searchedTerm: "", getNewBooks: true });
+    this.$store.dispatch("getBooks", {getNewBooks: true });
   },
   computed: {
     newBooks() {

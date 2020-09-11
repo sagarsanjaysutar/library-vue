@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { bookModel, userModel, issueReturnInfo } = require("../models/models");
+const { bookModel, issueReturnInfo } = require("../models/models");
 const fineAmount = 10;
+const issueDays = 6;
 
 function checkPenalty(dueDate, today) {
   var overDueDays = today.getDate() - dueDate.getDate();
@@ -21,28 +22,37 @@ function checkPenalty(dueDate, today) {
   }
 }
 
-router.get("/getBooks", (req, res) => {
-  const getNewBooks = req.query.getNewBooks;
-  const searchedTerm = req.query.searchedTerm;
+router.get("/books", (req, res) => {
+  const searchedTerm = req.query.searchedTerm || "";
+  const u_id = req.query.getIssuedBooks.u_id || "";
+
+  const getNewBooks = req.query.getNewBooks || false;
+  const getIssuedBooks = u_id != "" || u_id != undefined ? true : false;
+  const getSearchedBook =
+    searchedTerm != "" || searchedTerm != undefined ? true : false;
+
   if (getNewBooks) {
-    console.log("Searching for new books.");
+    console.group("Searching for new books.");
     const newBooks = bookModel.find().limit(4);
     newBooks
-      .then((result) => {
-        if (result) {
-          console.log("Found " + result.length + " new books.");
-          res.send(result);
+      .then((newBooks) => {
+        if (newBooks) {
+          console.log("Found " + newBooks.length + " new books.");
+          res.status(200).send(newBooks);
         } else {
           console.log("No new books found!!");
-          res.sendStatus(404);
+          res.status(200).send({ status: "New books not founds." });
         }
       })
       .catch((err) => {
         console.log("Error in fetching new books. \n -- " + err);
+        res
+          .status(400)
+          .send({ status: "Error in fetching new books.\n -- " + err });
       });
-  } else if (searchedTerm != "" || !searchedTerm != undefined) {
-    console.log("Searching book " + searchedTerm + " in db.");
-    const searchedBooks = bookModel
+  } else if (getSearchedBook) {
+    console.group("Searching book " + searchedTerm + " in db.");
+    bookModel
       .find({
         $or: [
           { name: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
@@ -50,146 +60,140 @@ router.get("/getBooks", (req, res) => {
           { genere: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
         ],
       })
-      .exec();
-
-    searchedBooks
-      .then((result) => {
-        if (result) {
+      .then((searchedBooks) => {
+        if (searchedBooks) {
           console.log(
-            "Found " + result.length + " containing term " + searchedTerm
+            "Found " + searchedBooks.length + " containing term " + searchedTerm
           );
-          res.send(result);
+          res.status(200).send(searchedBooks);
         } else {
-          console.log(result + " not found!!");
-          res.sendStatus(404);
+          console.log("No book found with '" + searchedTerm + "' in it.");
+          res.status(200).send({
+            status: "No book found with '" + searchedTerm + "' in it.",
+          });
         }
       })
       .catch((err) => {
-        console.log("Error in finding searched book. \n -- " + err);
+        console.log("Error in finding searched book. \n" + err);
+        res.status(400).send({
+          status: "Error in finding searched book.\n " + err,
+        });
+      });
+  } else if (getIssuedBooks) {
+    console.group("Searching issued books for " + u_id);
+    issueReturnInfo
+      .find({ u_id })
+      .then((books) => {
+        console.log("Found " + books.length + " books issued.");
+        res.status(200).send(books);
+      })
+      .catch((err) => {
+        console.log("Couldn't get issued books for " + id + ".\n" + err);
+
+        res.status(400).send({
+          status: "Couldn't get issued books for " + id + ".\n" + err,
+        });
       });
   } else {
-    res.status(406).send({
-      status: "Error in fetching books. \n" + err,
-    });
+    console.log("Wrong parameter for getting book.");
+    res.status(200).send({ status: "Books not founds. \n" + err });
   }
 });
 
-router.post("/add-books", (req, res) => {
-  var booksArr = Array();
-  booksArr = req.body;
-  booksArr.forEach((book) => {
-    if (book.name) {
-      var {
-        name,
-        author,
-        coverPage,
-        genere,
-        isIssued,
-        isReserved,
-        quantity,
-      } = book;
-
-      var newBook = {
-        name: name,
-        author: author,
-        coverPage: coverPage,
-        genere: genere,
-        isIssued: isIssued,
-        isReserved: isReserved,
-        quantity: quantity,
-      };
-
-      bookModel
-        .insertMany(newBook)
-        .then((response) => {
-          console.log(newBook.name + " added successfully.");
-          res.status(200).send({
-            status: newBook.name + " added successfully.",
-          });
-        })
-        .catch((err) => {
-          console.log("Error in adding book \n --" + err);
-          res.status(406).send({
-            status: "Error in adding book \n --" + err,
-          });
-        });
-    } else {
-      console.log("Invalid Data");
-      res.status(406).send({
-        status: "Invalid Data.",
-      });
-    }
-  });
-});
-
 router.post("/issue-book", (req, res) => {
-  const issuedBookDetails = req.body;
-  const id = mongoose.Types.ObjectId(issuedBookDetails.issuedBook);
-  //Check if book exist in bookModel collection and whether it can be issued.
+  const { b_id, s_id, e_id } = req.body;
+  console.group("Issuing " + b_id + " book for " + s_id + " by " + e_id + ".");
   bookModel
-    .countDocuments({
-      $and: [
-        {
-          _id: id,
-        },
-        {
-          isIssued: false,
-        },
-      ],
-    })
-    .then((count) => {
-      if (count > 0) {
-        //If yes, then add the details in issueReturn collection.
-        issuedBookDetails.issuedOn = new Date();
-        issuedBookDetails.dueDate = issuedBookDetails.issuedOn.setDate(
-          issuedBookDetails.issuedOn.getDate() + 7
-        );
-        issueReturnInfo
-          .insertMany(issuedBookDetails)
-          .then(() => {
-            res.status(200).send({
-              status: "Book issued successfully.",
-            });
-          })
-          .catch((err) => {
-            res.status(406).send({
-              status: "Failed to issue book.\n" + err,
-            });
-          });
-        //Update the isIssued key in bookModel
-        bookModel
-          .updateOne(
-            {
-              _id: issuedBookDetails.issuedBook,
-            },
-            {
-              $set: {
-                isIssued: true,
-              },
+    .findOne({ b_id })
+    .then((book) => {
+      if (book) {
+        const { totalQuantity, issuedQuantity } = book;
+        const isBookAvaiblable =
+          totalQuantity - issuedQuantity > 0 ? true : false;
+        const currentDate = new Date().getDate();
+
+        if (isBookAvaiblable) {
+          const dueDate = new Date();
+          dueDate = new Date().setDate(currentDate + issueDays);
+          const transaction_info = {
+            t_id: getTransactionId(),
+            issuedOn: currentDate,
+            issuedTo: s_id,
+            issuedBook: b_id,
+            issuedBy: e_id,
+            dueDate: dueDate.getDate(),
+            dueDateExtensionNumber: 0,
+          };
+          new issueReturnInfo(transaction_info).save().then((transaction) => {
+            if (transaction) {
+              console.log("Book issued successfully.");
+              res.status(200).send({ status: "Book issued successfully." });
+            } else {
+              console.log("Failed to issue the book.");
+              res.status(200).send({ status: "Failed to issue the book." });
             }
-          )
-          .then(() => {
-            console.log(
-              "Book details updated for " + issuedBookDetails.issuedBook
-            );
-          })
-          .catch(() => {
-            res.status(406).send({
-              status: "Failed to update book info.\n" + err,
-            });
           });
+        } else {
+          console.log(b_id + " book is not available.");
+          res.status(200).send({ status: b_id + "book is not available." });
+        }
       } else {
-        throw new Error("Book already issued. " + count);
+        console.log(b_id + " book doesn't exists.");
+        res.status(200).send({ status: b_id + " book doesn't exists." });
       }
     })
     .catch((err) => {
-      res.status(406).send({
-        status: "Book not found or \n" + err,
+      console.log("Error in issuing book \n." + err);
+      res.status(400).send({
+        status: "Error in issuing book. \n" + err,
       });
     });
 });
 
 router.post("/return-book", (req, res) => {
+  const { b_id, s_id, e_id, penalityPaidStatus } = req.body;
+  console.group(
+    "Returning " + b_id + " book for " + s_id + " by " + e_id + "."
+  );
+
+  issueReturnInfo
+    .find({ b_id: b_id, s_id: s_id, e_id: e_id })
+    .limit(1)
+    .sort({ $natural: -1 })
+    .then((transaction) => {
+      if (transaction) {
+        const currentDate = new Date().getDate();
+        const isDue = transaction.dueDate - currentDate >= 0 ? false : true;
+        if (isDue) {
+          const dueDays = currentDate - transaction.dueDate;
+          const penalty = dueDays * fineAmount;
+          res.status(200).send({ penalty: { dueDays, penalty } });
+          if (penalityPaidStatus) {
+            transaction.returnedOn = currentDate;
+            transaction.returnedTo = e_id;
+            transaction.overDueDays = dueDays;
+            transaction.penalityAmount = penalty;
+            transaction.penalityPaidStatus = penalityPaidStatus;
+            res.status(200).send({ status: "Fine recieved. Thank you!" });
+          }
+        } else {
+          transaction.returnedOn = currentDate;
+          transaction.returnedTo = e_id;
+        }
+      } else {
+        console.log("Failed to return book. No transaction found.");
+        res.status(400).send({
+          status: "Failed to return book. No transaction Found.",
+        });
+      }
+    })
+    .catch((err) => {
+      console.log("Error in returning book \n." + err);
+      res.status(400).send({
+        status: "Error in returning book. \n" + err,
+      });
+    });
+
   const returnedBook = req.body;
   //Check if the book is in the issueReturnInfo
   issueReturnInfo
@@ -289,3 +293,51 @@ router.post("/return-book", (req, res) => {
 });
 
 module.exports = router;
+
+router.post("/books", (req, res) => {
+  var booksArr = Array();
+  booksArr = req.body;
+  booksArr.forEach((book) => {
+    if (book.name) {
+      var {
+        name,
+        author,
+        coverPage,
+        genere,
+        isIssued,
+        isReserved,
+        quantity,
+      } = book;
+
+      var newBook = {
+        name: name,
+        author: author,
+        coverPage: coverPage,
+        genere: genere,
+        isIssued: isIssued,
+        isReserved: isReserved,
+        quantity: quantity,
+      };
+
+      bookModel
+        .insertMany(newBook)
+        .then((response) => {
+          console.log(newBook.name + " added successfully.");
+          res.status(200).send({
+            status: newBook.name + " added successfully.",
+          });
+        })
+        .catch((err) => {
+          console.log("Error in adding book \n --" + err);
+          res.status(406).send({
+            status: "Error in adding book \n --" + err,
+          });
+        });
+    } else {
+      console.log("Invalid Data");
+      res.status(406).send({
+        status: "Invalid Data.",
+      });
+    }
+  });
+});

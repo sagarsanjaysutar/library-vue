@@ -14,6 +14,7 @@ export const store = new vuex.Store({
     newBooks: [],
     status: {},
     userInfo: {},
+    studentBooks: [],
   },
   mutations: {
     setStatus(state, status) {
@@ -30,32 +31,35 @@ export const store = new vuex.Store({
     setNewBook(state, newBooks) {
       state.newBooks = newBooks;
     },
+    setStudentBooks(state, books) {
+      state.studentBooks = books;
+    },
   },
   actions: {
-    fetchBooks({ commit }, { searchedTerm, getNewBooks }) {
-      if (getNewBooks) {
+    getBooks({ commit, state }, data) {
+      if (data.getNewBooks) {
         axios
-          .get("/getBooks", { params: { getNewBooks: true } })
-          .then((resp) => {
-            let bookCount = resp.data.length;
+          .get("/books", { params: { getNewBooks: true } })
+          .then((books) => {
+            let bookCount = books.data.length;
             console.log(
               "Successfully got " + bookCount + " new books in store."
             );
-            commit("setNewBook", resp.data);
+            commit("setNewBook", books.data);
           })
           .catch((err) => {
             console.log("Error in fetching new books in store. \n-" + err);
           });
-      } else {
+      } else if (data.searchedTerm != "" || !data.searchedTerm != undefined) {
         axios
-          .get("/getBooks", { params: { searchedTerm: searchedTerm } })
+          .get("/books", { params: { searchedTerm: data.searchedTerm } })
           .then((resp) => {
             let bookCount = resp.data.length;
             console.log(
               "Successfully found " +
                 bookCount +
                 " books with search keyword : " +
-                searchedTerm +
+                data.searchedTerm +
                 "in store."
             );
             commit("setSearchedBook", resp.data);
@@ -63,6 +67,18 @@ export const store = new vuex.Store({
           .catch((err) => {
             console.log("Error in fetching searched books. \n-" + err);
           });
+      } else if (data.getStudentBooks) {
+        axios
+          .get("/books", { params: { userInfo: state.userInfo.id } })
+          .then((books) => {
+            commit("setStudentBooks", books);
+          })
+          .catch((err) => {
+            commit("setStatus", err);
+          });
+      } else {
+        console.log("Not proper parameter to getbooks.");
+        commit("setStatus", "Opps, something went wrong.");
       }
     },
     login({ commit }, data) {
