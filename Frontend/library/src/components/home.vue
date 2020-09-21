@@ -1,6 +1,6 @@
 <template>
-  <v-container fluid class="primaryLight pa-5">
-    <v-row style="height: 60vh">
+  <v-container fluid class="">
+    <!-- <v-row style="height: 60vh">
       <v-col cols="12" class="flex-center">
         <v-icon
           class="secondaryLight--text text-center font-weight-regular"
@@ -34,8 +34,8 @@
           Material is a design system – backed by open-source code.
         </p>
       </v-col>
-    </v-row>
-    <v-row class="primary pt-5">
+    </v-row> -->
+    <v-row class="primary">
       <v-col cols="12" class="flex-center">
         <v-icon
           class="secondaryLight--text text-center font-weight-regular"
@@ -62,26 +62,13 @@ import booksContainer from "./book/booksContainer";
 
 export default {
   name: "Home",
-  data: () => {
-    return {
-      searchedTerm: "",
-     
-    };
-  },
-  methods: {
-    getBooks() {
-      this.$router.push({
-        name: `searchedResults`,
-        query: { search: this.searchedTerm },
-      });
-    },
-  },
+
   created() {
-    this.$store.dispatch("getBooks", {getNewBooks: true });
+    this.$store.dispatch("getNewBooks");
   },
   computed: {
     newBooks() {
-      return this.$store.state.newBooks;
+      return this.$store.state.books.newBooks;
     },
   },
   components: {

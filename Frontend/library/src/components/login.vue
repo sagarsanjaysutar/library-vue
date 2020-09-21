@@ -191,17 +191,14 @@ export default {
   },
   methods: {
     login() {
-      
-      this.$emit("showLogin", false)
+      this.$emit("showLogin", false);
       const { email, password } = this;
-      this.$store.dispatch("login", { email, password }).then((status) => {
-        if (status === 200) {
-          this.$router.push({ name: "dashboard" });
-        }
+      this.$store.dispatch("login", { email, password }).then(() => {
+        this.$router.push({ name: "dashboard" });
       });
     },
     createAccount() {
-       this.$emit("showLogin", false)
+      this.$emit("showLogin", false);
       this.showSignUp = false;
       const userInfo = {
         name: this.name,

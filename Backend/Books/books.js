@@ -22,82 +22,81 @@ function checkPenalty(dueDate, today) {
   }
 }
 
-router.get("/books", (req, res) => {
-  const searchedTerm = req.query.searchedTerm || "";
+router.get("/books/newBooks", (req, res) => {
+  console.group("Searching for new books.");
+  const newBooks = bookModel.find().limit(4);
+  newBooks
+    .then((newBooks) => {
+      if (newBooks) {
+        console.log("Found " + newBooks.length + " new books.");
+        console.groupEnd();
+        res.status(200).send(newBooks);
+      } else {
+        console.log("No new books found!!");
+        console.groupEnd();
+        res.status(200).send({ status: "New books not founds." });
+      }
+    })
+    .catch((err) => {
+      console.log("Error in fetching new books. \n -- " + err);
+      console.groupEnd();
+      res
+        .status(400)
+        .send({ status: "Error in fetching new books.\n -- " + err });
+    });
+});
+
+router.get("/books/issuedBooks", (req, res) => {
   const u_id = req.query.getIssuedBooks.u_id || "";
+  console.group("Searching issued books for " + u_id);
+  issueReturnInfo
+    .find({ u_id })
+    .then((books) => {
+      console.log("Found " + books.length + " books issued.");
+      res.status(200).send(books);
+    })
+    .catch((err) => {
+      console.log("Couldn't get issued books for " + id + ".\n" + err);
 
-  const getNewBooks = req.query.getNewBooks || false;
-  const getIssuedBooks = u_id != "" || u_id != undefined ? true : false;
-  const getSearchedBook =
-    searchedTerm != "" || searchedTerm != undefined ? true : false;
-
-  if (getNewBooks) {
-    console.group("Searching for new books.");
-    const newBooks = bookModel.find().limit(4);
-    newBooks
-      .then((newBooks) => {
-        if (newBooks) {
-          console.log("Found " + newBooks.length + " new books.");
-          res.status(200).send(newBooks);
-        } else {
-          console.log("No new books found!!");
-          res.status(200).send({ status: "New books not founds." });
-        }
-      })
-      .catch((err) => {
-        console.log("Error in fetching new books. \n -- " + err);
-        res
-          .status(400)
-          .send({ status: "Error in fetching new books.\n -- " + err });
+      res.status(400).send({
+        status: "Couldn't get issued books for " + id + ".\n" + err,
       });
-  } else if (getSearchedBook) {
-    console.group("Searching book " + searchedTerm + " in db.");
-    bookModel
-      .find({
-        $or: [
-          { name: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
-          { author: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
-          { genere: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
-        ],
-      })
-      .then((searchedBooks) => {
-        if (searchedBooks) {
-          console.log(
-            "Found " + searchedBooks.length + " containing term " + searchedTerm
-          );
-          res.status(200).send(searchedBooks);
-        } else {
-          console.log("No book found with '" + searchedTerm + "' in it.");
-          res.status(200).send({
-            status: "No book found with '" + searchedTerm + "' in it.",
-          });
-        }
-      })
-      .catch((err) => {
-        console.log("Error in finding searched book. \n" + err);
-        res.status(400).send({
-          status: "Error in finding searched book.\n " + err,
+    });
+});
+
+router.get("/books/searchedBooks", (req, res) => {
+  const searchedTerm = req.query.searchQuery;
+  console.group("Searching book " + searchedTerm + " in db.");
+  bookModel
+    .find({
+      $or: [
+        { name: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
+        { author: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
+        { genere: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
+      ],
+    })
+    .then((searchedBooks) => {
+      if (searchedBooks) {
+        console.log(
+          "Found " + searchedBooks.length + " containing term " + searchedTerm
+        );
+        console.groupEnd();
+        res.status(200).send(searchedBooks);
+      } else {
+        console.log("No book found with '" + searchedTerm + "' in it.");
+        console.groupEnd();
+        res.status(200).send({
+          status: "No book found with '" + searchedTerm + "' in it.",
         });
+      }
+    })
+    .catch((err) => {
+      console.log("Error in finding searched book. \n" + err);
+      console.groupEnd();
+      res.status(400).send({
+        status: "Error in finding searched book.\n " + err,
       });
-  } else if (getIssuedBooks) {
-    console.group("Searching issued books for " + u_id);
-    issueReturnInfo
-      .find({ u_id })
-      .then((books) => {
-        console.log("Found " + books.length + " books issued.");
-        res.status(200).send(books);
-      })
-      .catch((err) => {
-        console.log("Couldn't get issued books for " + id + ".\n" + err);
-
-        res.status(400).send({
-          status: "Couldn't get issued books for " + id + ".\n" + err,
-        });
-      });
-  } else {
-    console.log("Wrong parameter for getting book.");
-    res.status(200).send({ status: "Books not founds. \n" + err });
-  }
+    });
 });
 
 router.post("/issue-book", (req, res) => {
@@ -341,3 +340,81 @@ router.post("/books", (req, res) => {
     }
   });
 });
+
+// router.get("/books", (req, res) => {
+//   const searchedTerm = req.query.searchedTerm || "";
+
+//   const getNewBooks = req.query.getNewBooks || false;
+//   const getIssuedBooks = req.query.getIssuedBooks !== undefined ? true : false;
+//   const getSearchedBook =
+//     searchedTerm != "" || searchedTerm != undefined ? true : false;
+
+//   if (getNewBooks) {
+//     console.group("Searching for new books.");
+//     const newBooks = bookModel.find().limit(4);
+//     newBooks
+//       .then((newBooks) => {
+//         if (newBooks) {
+//           console.log("Found " + newBooks.length + " new books.");
+//           res.status(200).send(newBooks);
+//         } else {
+//           console.log("No new books found!!");
+//           res.status(200).send({ status: "New books not founds." });
+//         }
+//       })
+//       .catch((err) => {
+//         console.log("Error in fetching new books. \n -- " + err);
+//         res
+//           .status(400)
+//           .send({ status: "Error in fetching new books.\n -- " + err });
+//       });
+//   } else if (getSearchedBook) {
+//     console.group("Searching book " + searchedTerm + " in db.");
+//     bookModel
+//       .find({
+//         $or: [
+//           { name: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
+//           { author: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
+//           { genere: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
+//         ],
+//       })
+//       .then((searchedBooks) => {
+//         if (searchedBooks) {
+//           console.log(
+//             "Found " + searchedBooks.length + " containing term " + searchedTerm
+//           );
+//           res.status(200).send(searchedBooks);
+//         } else {
+//           console.log("No book found with '" + searchedTerm + "' in it.");
+//           res.status(200).send({
+//             status: "No book found with '" + searchedTerm + "' in it.",
+//           });
+//         }
+//       })
+//       .catch((err) => {
+//         console.log("Error in finding searched book. \n" + err);
+//         res.status(400).send({
+//           status: "Error in finding searched book.\n " + err,
+//         });
+//       });
+//   } else if (getIssuedBooks) {
+//     const u_id = req.query.getIssuedBooks.u_id || "";
+//     console.group("Searching issued books for " + u_id);
+//     issueReturnInfo
+//       .find({ u_id })
+//       .then((books) => {
+//         console.log("Found " + books.length + " books issued.");
+//         res.status(200).send(books);
+//       })
+//       .catch((err) => {
+//         console.log("Couldn't get issued books for " + id + ".\n" + err);
+
+//         res.status(400).send({
+//           status: "Couldn't get issued books for " + id + ".\n" + err,
+//         });
+//       });
+//   } else {
+//     console.log("Wrong parameter for getting book.");
+//     res.status(200).send({ status: "Books not founds. \n" + err });
+//   }
+// });

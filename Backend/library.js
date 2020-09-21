@@ -1,7 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const authRoute = require("./Authentication/auth");
+const { authRouter } = require("./Auth/auth");
 const books = require("./Books/books");
 
 const app = express();
@@ -10,7 +10,7 @@ app.use(cors({ origin: ["http://localhost:8080", "http://localhost:8081"] }));
 
 const port = "9090";
 
-app.use(authRoute);
+app.use(authRouter);
 app.use(books);
 
 app.listen(port, () => {

@@ -1,11 +1,11 @@
 <template>
-  <v-container class="primaryLight fill-height justify-center" fluid>
-    <v-card class="primaryLight" width="90%" elevation="0">
+  <v-container class="fill-height justify-center" fluid>
+    <v-card class="primary" width="90%" elevation="0">
       <v-card-title> Searched books </v-card-title>
       <v-card-subtitle>
         {{ books.length }} books found with the term
         <v-chip style="min-width: 3rem" class="ml-3 mr-3">
-          {{ searchedTerm }} </v-chip
+          {{ $route.query.search }} </v-chip
         >in it.</v-card-subtitle
       >
       <v-divider></v-divider>
@@ -28,21 +28,13 @@ export default {
     bookContainer,
   },
   beforeCreate() {
-    let searchTerm = this.$route.query.search;
-    if (searchTerm)
-      this.$store.dispatch("getBooks", {
-        searchedTerm: searchTerm,
-        getNewBooks: false,
-      });
-  },
-
-  created() {
-    this.searchedTerm = this.$route.query.search;
+    const searchedTerm = this.$route.query.search;
+    this.$store.dispatch("getSearchedBooks", searchedTerm);
   },
 
   computed: {
     books() {
-      return this.$store.state.searchedBooks;
+      return this.$store.state.books.searchedBooks;
     },
   },
 };

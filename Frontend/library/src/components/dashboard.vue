@@ -1,6 +1,6 @@
 <template>
-  <v-container class="primaryLight fill-height justify-center" fluid>
-    <v-card class="primaryLight" width="90%" elevation="0">
+  <v-container class="fill-height justify-center" fluid>
+    <v-card class="primary" width="90%" elevation="0">
       <v-card-title> Welcome, {{ userInfo.name }} </v-card-title>
       <v-card-subtitle>Here are list of your books.</v-card-subtitle>
       <v-divider></v-divider>
@@ -24,9 +24,6 @@ export default {
   computed: {
     userInfo() {
       return this.$store.state.userInfo;
-    },
-    newBooks() {
-      return this.$store.state.newBooks;
     },
   },
 };
