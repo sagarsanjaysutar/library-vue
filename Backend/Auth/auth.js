@@ -61,20 +61,20 @@ router.post("/login", (req, res) => {
           } else {
             console.log("Wrong password.");
             console.groupEnd();
-            res.status(200).send({ status: "Wrong password." });
+            res.status(401).send({ status: "Incorrect email or password." });
           }
         });
       } else {
         console.log("Couldn't find email.");
         console.groupEnd();
-        res.status(200).send({ status: "Couldn't find email." });
+        res.status(401).send({ status: "Couldn't find email." });
       }
     })
     .catch((err) => {
       console.log("Something went wrong. \n" + err);
       console.groupEnd();
 
-      res.status(400).send({ status: "Something went wrong. \n" + err });
+      res.status(503).send({ status: "Something went wrong. \n" + err });
     });
 });
 router.post("/register", (req, res) => {
@@ -105,7 +105,7 @@ router.post("/register", (req, res) => {
             }
           })
           .catch((err) => {
-            res.status(400).send({ status: "Something went wrong. \n" + err });
+            res.status(503).send({ status: "Something went wrong. \n" + err });
           });
       }
     });
@@ -115,7 +115,7 @@ router.post("/logout", (req, res) => {
   const { token, email } = req.body;
   blackList.push(token); // Push the token in blackList
   console.log("Logout request recieved from " + email);
-  res.status(200).send({ status: "Logged out successful." });
+  res.status(200).send({ status: "Logged out successfully." });
 });
 
 module.exports.authRouter = router;

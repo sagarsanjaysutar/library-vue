@@ -1,11 +1,9 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import home from "../components/home.vue";
-import contact from "../components/contact.vue";
-import about from "../components/about.vue";
-import searchedResults from "../components/book/searchedResults.vue";
-import dashboard from "../components/dashboard";
-import error404 from "../components/error404.vue";
+import home from "../views/Home.vue";
+import searchedResults from "../views/SearchedResults.vue";
+import dashboard from "../views/Dashboard";
+import error404 from "../views/Error404.vue";
 
 Vue.use(VueRouter);
 
@@ -27,16 +25,7 @@ const routes = [
     name: "searchedResults",
     component: searchedResults,
   },
-  {
-    path: "/about",
-    name: "about",
-    component: about,
-  },
-  {
-    path: "/contact",
-    name: "contact",
-    component: contact,
-  },
+
   {
     path: "/error404",
     name: "error404",

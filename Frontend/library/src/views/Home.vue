@@ -51,14 +51,14 @@
         </p>
       </v-col>
       <v-col cols="12" class="pa-0">
-        <booksContainer :books="newBooks" />
+        <bookCards :books="newBooks" />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import booksContainer from "./book/booksContainer";
+import bookCards from "../components/bookCards";
 
 export default {
   name: "Home",
@@ -72,7 +72,7 @@ export default {
     },
   },
   components: {
-    booksContainer,
+    bookCards,
   },
 };
 </script>

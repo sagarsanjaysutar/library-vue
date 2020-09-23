@@ -85,57 +85,66 @@
       <v-card-title>Sign up</v-card-title>
       <v-card-subtitle>Make a new account.</v-card-subtitle>
       <v-form class="ma-2 pa-3">
+        <v-text-field
+          color="accent"
+          v-model="name"
+          outlined
+          label="Name"
+          placeholder="Name"
+        ></v-text-field>
         <v-row>
           <v-col>
             <v-text-field
               color="accent"
-              v-model="id"
+              v-model="email"
+              :rules="rules.email"
               outlined
-              label="ID"
-              placeholder="ID"
+              label="Email"
+              placeholder="Email"
+            ></v-text-field>
+          </v-col>
+          <v-col>
+            <v-overflow-btn
+              v-model="role"
+              solo
+              :items="roles"
+              label="Role"
+              outlined
+              color="primary"
+              background-color="primary"
+            ></v-overflow-btn>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col>
+            <v-text-field
+              color="accent"
+              v-model="password"
+              :rules="rules.password"
+              outlined
+              label="Password"
+              placeholder="Password"
+              :type="showPassword ? 'text' : 'password'"
+              :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+              @click:append="showPassword = !showPassword"
             ></v-text-field>
           </v-col>
           <v-col>
             <v-text-field
               color="accent"
-              v-model="name"
+              v-model="confirmPassword"
+              :rules="rules.confirmPassword.concat(passwordConfirmationRule)"
               outlined
-              label="Name"
-              placeholder="Name"
+              label="Confirm password"
+              placeholder="Confirm password"
+              :type="showPassword ? 'text' : 'password'"
+              :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+              @click:append="showPassword = !showPassword"
             ></v-text-field>
           </v-col>
         </v-row>
 
-        <v-text-field
-          color="accent"
-          v-model="email"
-          :rules="rules.email"
-          outlined
-          label="Email"
-          placeholder="Email"
-        ></v-text-field>
-        <v-text-field
-          color="accent"
-          v-model="password"
-          :rules="rules.password"
-          outlined
-          label="Password"
-          placeholder="Password"
-          :type="showPassword ? 'text' : 'password'"
-          :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-          @click:append="showPassword = !showPassword"
-        ></v-text-field>
-        <v-text-field
-          color="accent"
-          v-model="confirmPassword"
-          :rules="rules.confirmPassword.concat(passwordConfirmationRule)"
-          outlined
-          label="Confirm password"
-          placeholder="Confirm password"
-          :type="showPassword ? 'text' : 'password'"
-          :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-          @click:append="showPassword = !showPassword"
-        ></v-text-field>
         <v-card-actions>
           <a
             class="text-transform-none font-weight-regular align-start d-flex accent--text"
@@ -167,6 +176,7 @@ export default {
       email: "",
       password: "",
       confirmPassword: "",
+      role: "",
       showPassword: false,
       showLogin: true,
       showForgotPassword: false,
@@ -174,6 +184,7 @@ export default {
       isUser: true,
       hasForgottenPassword: false,
       isCreatingAccount: false,
+      roles: ["Student", "Employee"],
       rules: {
         email: [
           (v) => !!v || "E-mail is required",
@@ -191,20 +202,26 @@ export default {
   },
   methods: {
     login() {
-      this.$emit("showLogin", false);
+      this.$emit("close", true);
       const { email, password } = this;
-      this.$store.dispatch("login", { email, password }).then(() => {
-        this.$router.push({ name: "dashboard" });
-      });
+      this.$store
+        .dispatch("login", { email, password })
+        .then(() => {
+          this.$router.push({ name: "dashboard" });
+        })
+        .catch((err) => {
+          this.$store.commit("setStatus", err.response.data);
+        });
     },
     createAccount() {
-      this.$emit("showLogin", false);
+      this.$emit("close", true);
       this.showSignUp = false;
       const userInfo = {
         name: this.name,
         id: this.id,
         email: this.email,
         password: this.password,
+        type: this.role,
       };
       this.$store.dispatch("register", userInfo);
     },

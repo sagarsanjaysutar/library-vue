@@ -14,31 +14,31 @@ mongoose
   });
 
 const booksScehma = new mongoose.Schema({
-  b_id:String,
+  b_id: String,
   name: String,
   author: String,
   coverPage: String,
-  genere: String, 
+  genere: String,
   totalQuantity: Number,
   issuedQuantity: Number,
 });
 
 const usersScehma = new mongoose.Schema({
-  u_id:String,
-  name: String,  
-  email: String,
-  password: String,
-  type: String,
+  u_id: String,
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  type: { type: String, required: true },
 });
 
 const issueReturnInfoSchema = new mongoose.Schema({
-  t_id:String,
+  t_id: String,
   issuedOn: Date,
   issuedTo: String,
   issuedBook: String,
   issuedBy: String,
   dueDate: Date,
-  dueDateExtensionNumber:Number, 
+  dueDateExtensionNumber: Number,
   returnedOn: Date,
   returnedTo: String,
   overDueDays: Number,
@@ -51,7 +51,7 @@ const bookModel = mongoose.model("bookmodel", booksScehma);
 const issueReturnInfo = mongoose.model(
   "issueReturnInfo",
   issueReturnInfoSchema
-);  
+);
 
 module.exports = {
   userModel,

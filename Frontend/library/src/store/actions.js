@@ -60,7 +60,6 @@ export default {
         commit("setStatus", "Opps, something went wrong.\n" + err);
       });
   },
-
   login({ commit }, data) {
     return axios
       .post("/login", data)
@@ -74,7 +73,7 @@ export default {
         }
       })
       .catch((err) => {
-        commit("setStatus", err);
+        commit("setStatus", err.response.data.status);
       });
   },
   register({ commit }, userInfo) {

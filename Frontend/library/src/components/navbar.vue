@@ -1,6 +1,6 @@
 <template>
   <span>
-    <v-dialog v-model="showLogOut" width="25rem">
+    <v-dialog v-model="showLogOut" width="30rem">
       <v-card class="primaryLight">
         <v-card-title class="headline">Ready to Leave?</v-card-title>
 
@@ -17,6 +17,9 @@
         </v-card-actions>
       </v-card></v-dialog
     >
+    <v-dialog v-model="showLogin" max-width="30rem"
+      ><login @close="showLogin = !$event"
+    /></v-dialog>
     <nav>
       <v-toolbar class="primary" elevation="10">
         <v-toolbar-title class="secondaryLight--text">Library</v-toolbar-title>
@@ -57,15 +60,18 @@
                     <v-list-item-title class="title"
                       >{{ $store.state.userInfo.name }}
                     </v-list-item-title>
+                    <v-list-item-subtitle
+                      >{{ $store.state.userInfo.email }}
+                    </v-list-item-subtitle>
                     <v-list-item-subtitle>{{
-                      $store.state.userInfo.email
+                      $store.state.userInfo.type
                     }}</v-list-item-subtitle>
                   </v-list-item-content>
                 </v-list-item>
 
                 <v-divider></v-divider>
 
-                <v-list-item link to="/profile">
+                <v-list-item link to="/dashboard">
                   <v-list-item-action>
                     <v-icon>mdi-account-circle</v-icon>
                   </v-list-item-action>
@@ -87,21 +93,16 @@
           </v-menu>
         </span>
         <span v-else>
-          <v-dialog v-model="showLogin" max-width="30rem">
-            <template v-slot:activator="{ on, attrs }" v-bind="attrs" v-on="on">
-              <v-btn
-                class="ml-5"
-                color="secondaryLight"
-                @click="showLogin = true"
-                @showLogin="showLogin = $event"
-                outlined
-              >
-                <span>Sign in</span>
-                <v-icon right class="secondaryLight--text">mdi-account</v-icon>
-              </v-btn>
-            </template>
-            <login />
-          </v-dialog>
+          <v-btn
+            class="ml-5"
+            color="secondaryLight"
+            @click="showLogin = true"
+            @showLogin="showLogin = $event"
+            outlined
+          >
+            <span>Sign in</span>
+            <v-icon right class="secondaryLight--text">mdi-account</v-icon>
+          </v-btn>
         </span>
       </v-toolbar>
     </nav>
@@ -129,6 +130,11 @@ export default {
       });
     },
     getSearchedBooks() {
+      //   const newPath = `/searchedResults?search=${this.searchQuery}`;
+      //   const currentPath = `/searchedResults?search=${this.$route.query.search}`;
+
+      //   if (newPath !== currentPath) {
+      // console.log("x");
       this.$router.push({
         name: `searchedResults`,
         query: { search: this.searchQuery },

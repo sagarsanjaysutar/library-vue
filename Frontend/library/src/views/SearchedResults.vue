@@ -9,13 +9,15 @@
         >in it.</v-card-subtitle
       >
       <v-divider></v-divider>
-      <bookContainer :books="books"></bookContainer>
+
+      <bookCards :books="books"></bookCards>
     </v-card>
   </v-container>
 </template>
 
 <script>
-import bookContainer from "./booksContainer";
+import bookCards from "../components/bookCards";
+
 export default {
   name: "searchedResults",
   data: () => {
@@ -25,7 +27,7 @@ export default {
   },
 
   components: {
-    bookContainer,
+    bookCards,
   },
   beforeCreate() {
     const searchedTerm = this.$route.query.search;

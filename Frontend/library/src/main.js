@@ -7,7 +7,7 @@ import { store } from "./store/store";
 Vue.config.productionTip = false;
 
 router.beforeEach(({ path }, from, next) => {
-  const publicPages = ["/", "/searchedResults", "/about", "/contact"];
+  const publicPages = ["/", "/searchedResults"];
   const privatePages = ["/dashboard"];
   const isPrivatePage = privatePages.includes(path);
   if (isPrivatePage) {
