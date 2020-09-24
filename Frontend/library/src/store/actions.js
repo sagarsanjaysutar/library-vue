@@ -74,6 +74,7 @@ export default {
       })
       .catch((err) => {
         commit("setStatus", err.response.data.status);
+        return err.response.status;
       });
   },
   register({ commit }, userInfo) {

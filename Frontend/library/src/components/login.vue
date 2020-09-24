@@ -206,8 +206,10 @@ export default {
       const { email, password } = this;
       this.$store
         .dispatch("login", { email, password })
-        .then(() => {
-          this.$router.push({ name: "dashboard" });
+        .then((status) => {
+          if (status === 200) {
+            this.$router.push({ name: "dashboard" });
+          }
         })
         .catch((err) => {
           this.$store.commit("setStatus", err.response.data);

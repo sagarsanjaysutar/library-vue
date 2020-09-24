@@ -1,26 +1,9 @@
 const express = require("express");
+const randomId = require("random-id");
 const router = express.Router();
 const { bookModel, issueReturnInfo } = require("../models/models");
 const fineAmount = 10;
 const issueDays = 6;
-
-function checkPenalty(dueDate, today) {
-  var overDueDays = today.getDate() - dueDate.getDate();
-  if (overDueDays > 0) {
-    var totalFine = overDueDays * fineAmount;
-    return {
-      overDueDays,
-      totalFine,
-    };
-  } else {
-    overDueDays = 0;
-    totalFine = 0;
-    return {
-      overDueDays,
-      totalFine,
-    };
-  }
-}
 
 router.get("/books/newBooks", (req, res) => {
   console.group("Searching for new books.");
@@ -107,26 +90,49 @@ router.post("/issue-book", (req, res) => {
     .then((book) => {
       if (book) {
         const { totalQuantity, issuedQuantity } = book;
-        const isBookAvaiblable =
-          totalQuantity - issuedQuantity > 0 ? true : false;
-        const currentDate = new Date().getDate();
+        const isBookAvaiblable = issuedQuantity < totalQuantity ? true : false;
 
         if (isBookAvaiblable) {
-          const dueDate = new Date();
-          dueDate = new Date().setDate(currentDate + issueDays);
           const transaction_info = {
-            t_id: getTransactionId(),
-            issuedOn: currentDate,
+            t_id: "T_" + randomId(8, "aA0"),
+            issuedOn: new Date(),
             issuedTo: s_id,
             issuedBook: b_id,
             issuedBy: e_id,
-            dueDate: dueDate.getDate(),
+            dueDate: new Date(
+              new Date().setDate(new Date().getDate() + issueDays)
+            ),
             dueDateExtensionNumber: 0,
           };
           new issueReturnInfo(transaction_info).save().then((transaction) => {
             if (transaction) {
-              console.log("Book issued successfully.");
-              res.status(200).send({ status: "Book issued successfully." });
+              bookModel
+                .update({ b_id: b_id }, { $inc: { issuedQuantity: 1 } })
+                .then(({ ok }) => {
+                  if (ok === 1) {
+                    console.log("Book issued successfully.");
+                    console.groupEnd();
+                    res
+                      .status(200)
+                      .send({ status: "Book issued successfully." });
+                  } else {
+                    console.groupEnd();
+                    res.status(400).send({
+                      status:
+                        "Error in issuing book,failed to update book quantity.",
+                    });
+                  }
+                })
+                .catch((err) => {
+                  console.log(
+                    "Error in issuing book, failed to update book quantity. \n." +
+                      err
+                  );
+                  console.groupEnd();
+                  res.status(400).send({
+                    status: "Error in returning book. \n" + err,
+                  });
+                });
             } else {
               console.log("Failed to issue the book.");
               res.status(200).send({ status: "Failed to issue the book." });
@@ -156,12 +162,13 @@ router.post("/return-book", (req, res) => {
   );
 
   issueReturnInfo
-    .find({ b_id: b_id, s_id: s_id, e_id: e_id })
+    .find({ issuedBook: b_id, issuedTo: s_id, returnedOn: null })
     .limit(1)
-    .sort({ $natural: -1 })
-    .then((transaction) => {
-      if (transaction) {
-        const currentDate = new Date().getDate();
+    .sort({ issuedOn: -1 })
+    .then((transactions) => {
+      if (transactions.length === 1) {
+        const transaction = transactions[0];
+        const currentDate = new Date();
         const isDue = transaction.dueDate - currentDate >= 0 ? false : true;
         if (isDue) {
           const dueDays = currentDate - transaction.dueDate;
@@ -173,121 +180,101 @@ router.post("/return-book", (req, res) => {
             transaction.overDueDays = dueDays;
             transaction.penalityAmount = penalty;
             transaction.penalityPaidStatus = penalityPaidStatus;
-            res.status(200).send({ status: "Fine recieved. Thank you!" });
+            bookModel
+              .update({ b_id: b_id }, { $inc: { issuedQuantity: -1 } })
+              .then(({ ok }) => {
+                if (ok === 1) {
+                  console.groupEnd();
+                  res.status(200).send({ status: "Fine recieved. Thank you!" });
+                } else {
+                  console.groupEnd();
+                  res.status(400).send({
+                    status:
+                      "Error in returning book,failed to update book quantity.",
+                  });
+                }
+              })
+              .catch((err) => {
+                console.log(
+                  "Error in returning book, failed to update book quantity. \n." +
+                    err
+                );
+                console.groupEnd();
+                res.status(400).send({
+                  status: "Error in returning book. \n" + err,
+                });
+              });
           }
         } else {
-          transaction.returnedOn = currentDate;
-          transaction.returnedTo = e_id;
+          issueReturnInfo
+            .update(
+              { issuedBook: b_id, issuedTo: s_id, returnedOn: null },
+              { returnedOn: new Date(), returnedTo: e_id }
+            )
+            .limit(1)
+            .sort({ issuedOn: -1 })
+            .then(({ ok }) => {
+              if (ok === 1) {
+                bookModel
+                  .update({ b_id: b_id }, { $inc: { issuedQuantity: -1 } })
+                  .then(({ ok }) => {
+                    if (ok === 1) {
+                      console.groupEnd();
+                      res.status(200).send({ status: "Book returned." });
+                    } else {
+                      console.groupEnd();
+                      res.status(400).send({
+                        status:
+                          "Error in returning book,failed to update book quantity.",
+                      });
+                    }
+                  })
+                  .catch((err) => {
+                    console.log(
+                      "Error in returning book, failed to update book quantity. \n." +
+                        err
+                    );
+                    console.groupEnd();
+                    res.status(400).send({
+                      status: "Error in returning book. \n" + err,
+                    });
+                  });
+              } else {
+                console.groupEnd();
+                res.status(400).send({
+                  status:
+                    "Error in returning book,failed to update transaction.",
+                });
+              }
+            })
+            .catch((err) => {
+              console.log(
+                "Error in returning book, failed to update  transaction. \n" +
+                  err
+              );
+              console.groupEnd();
+              res.status(400).send({
+                status:
+                  "Error in returning book, failed to update transaction. \n" +
+                  err,
+              });
+            });
         }
       } else {
-        console.log("Failed to return book. No transaction found.");
+        console.log(
+          "Error in returning book, failed to retrive transactions.\n" +
+            transactions
+        );
+        console.groupEnd();
         res.status(400).send({
-          status: "Failed to return book. No transaction Found.",
+          status: "Error in returning book, failed to retrive transactions",
         });
       }
     })
     .catch((err) => {
       console.log("Error in returning book \n." + err);
-      res.status(400).send({
-        status: "Error in returning book. \n" + err,
-      });
-    });
-
-  const returnedBook = req.body;
-  //Check if the book is in the issueReturnInfo
-  issueReturnInfo
-    .countDocuments({
-      $and: [
-        {
-          issuedBook: mongoose.Types.ObjectId(returnedBook.issuedBook),
-        },
-        {
-          returnedOn: null,
-        },
-      ],
-    })
-    .then((count) => {
-      if (count > 0) {
-        //To check the dueDate, penalties, overdues, etc. We first find the record and insert routerropiate values
-        issueReturnInfo
-          .find({
-            issuedBook: mongoose.Types.ObjectId(returnedBook.issuedBook),
-          })
-          .then((response) => {
-            var issueReturnInfo_record = response;
-            var today = new Date();
-            //today.setDate(today.getDate() + 11) //Uncomment this to see add penalty.
-            var { overDueDays, totalFine } = checkPenalty(
-              issueReturnInfo_record[0].dueDate,
-              today
-            );
-            var penalityPaidStatus = overDueDays == 0 ? true : false;
-            //If fine is paid then only update the values and return the book.
-            if (penalityPaidStatus) {
-              issueReturnInfo
-                .update(
-                  {
-                    $and: [
-                      {
-                        issuedBook: mongoose.Types.ObjectId(
-                          returnedBook.issuedBook
-                        ),
-                      },
-                      {
-                        returnedOn: null,
-                      },
-                    ],
-                  },
-                  {
-                    $set: {
-                      returnedTo: returnedBook.returnedTo,
-                      returnedOn: today,
-                      overDueDays: overDueDays,
-                      penalityAmount: totalFine,
-                      penalityPaidStatus: penalityPaidStatus,
-                    },
-                  }
-                )
-                .then(() => {
-                  res.status(200).send({
-                    status: "Book returned.",
-                  });
-                })
-                .catch((err) => {
-                  res.status(406).send({
-                    status: "Failed to return the book. " + err,
-                  });
-                });
-
-              bookModel.update(
-                {
-                  _id: returnedBook.issuedBook,
-                },
-                {
-                  $set: {
-                    isIssued: false,
-                  },
-                }
-              );
-            } else {
-              res.status(406).send({
-                status:
-                  "Pay the over due payment of " +
-                  totalFine +
-                  "rps for " +
-                  overDueDays +
-                  " days.",
-              });
-            }
-          });
-      } else {
-        throw new Error("--" + count);
-      }
-    })
-    .catch((err) => {
-      res.status(406).send({
-        status: "Book has not be issued. \n" + err,
-      });
+      console.groupEnd();
+      res.status(400).send({ status: "Error in returning book. \n" + err });
     });
 });
 
@@ -418,3 +405,94 @@ router.post("/books", (req, res) => {
 //     res.status(200).send({ status: "Books not founds. \n" + err });
 //   }
 // });
+
+//Return book code
+
+// const returnedBook = req.body;
+//Check if the book is in the issueReturnInfo
+// issueReturnInfo
+//   .countDocuments({
+//     $and: [
+//       {
+//         issuedBook: mongoose.Types.ObjectId(returnedBook.issuedBook),
+//       },
+//       {
+//         returnedOn: null,
+//       },
+//     ],
+//   })
+//   .then((count) => {
+//     if (count > 0) {
+//       //To check the dueDate, penalties, overdues, etc. We first find the record and insert routerropiate values
+//       issueReturnInfo
+//         .find({
+//           issuedBook: mongoose.Types.ObjectId(returnedBook.issuedBook),
+//         })
+//         .then((response) => {
+//           var issueReturnInfo_record = response;
+//           var today = new Date();
+//           //today.setDate(today.getDate() + 11) //Uncomment this to see add penalty.
+//           var { overDueDays, totalFine } = checkPenalty(
+//             issueReturnInfo_record[0].dueDate,
+//             today
+//           );
+//           var penalityPaidStatus = overDueDays == 0 ? true : false;
+//           //If fine is paid then only update the values and return the book.
+//           if (penalityPaidStatus) {
+//             issueReturnInfo
+//               .update(
+//                 {
+//                   $and: [
+//                     {
+//                       issuedBook: mongoose.Types.ObjectId(
+//                         returnedBook.issuedBook
+//                       ),
+//                     },
+//                     { returnedOn: null },
+//                   ],
+//                 },
+//                 {
+//                   $set: {
+//                     returnedTo: returnedBook.returnedTo,
+//                     returnedOn: today,
+//                     overDueDays: overDueDays,
+//                     penalityAmount: totalFine,
+//                     penalityPaidStatus: penalityPaidStatus,
+//                   },
+//                 }
+//               )
+//               .then(() => {
+//                 res.status(200).send({
+//                   status: "Book returned.",
+//                 });
+//               })
+//               .catch((err) => {
+//                 res.status(406).send({
+//                   status: "Failed to return the book. " + err,
+//                 });
+//               });
+
+//             bookModel.update(
+//               { _id: returnedBook.issuedBook },
+//               { $set: { isIssued: false } }
+//             );
+//           } else {
+//             res.status(406).send({
+//               status:
+//                 "Pay the over due payment of " +
+//                 totalFine +
+//                 "rps for " +
+//                 overDueDays +
+//                 " days.",
+//             });
+//           }
+//         });
+//     } else {
+//       throw new Error("--" + count);
+//     }
+//   })
+//   .catch((err) => {
+//     res.status(406).send({
+//       status: "Book has not be issued. \n" + err,
+//     });
+//   });

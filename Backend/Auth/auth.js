@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const randomId = require("random-id");
 
 const { userModel } = require("../models/models");
 
@@ -78,7 +79,6 @@ router.post("/login", (req, res) => {
     });
 });
 router.post("/register", (req, res) => {
-  const userTypes = ["student", "employee", "librarian"];
   let userInfo = req.body;
   bcrypt.genSalt(10, (err, salt) => {
     bcrypt.hash(userInfo.password, salt, (err, hash) => {
@@ -87,7 +87,19 @@ router.post("/register", (req, res) => {
         res.status(400).send({ status: "Something went wrong. \n" + err });
       } else {
         userInfo.password = hash;
-        userInfo.type = userTypes[Math.floor(Math.random() * userTypes.length)];
+        switch (userInfo.type) {
+          case "Student":
+            userInfo.s_id = "S_" + randomId(8, "aA0");
+            break;
+          case "Employee":
+            userInfo.e_id = "E_" + randomId(8, "aA0");
+            break;
+          default:
+            res.status(400).send({ status: "Invalid role. \n" + err });
+            break;
+        }
+        userInfo.type;
+
         userModel
           .countDocuments({ email: userInfo.email })
           .then((count) => {

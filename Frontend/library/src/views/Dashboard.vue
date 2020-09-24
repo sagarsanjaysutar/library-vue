@@ -1,5 +1,10 @@
 <template>
-  <v-container class="red justify-center align-center" fill-height>
+  <v-container
+    class="red justify-center align-center"
+    fill-height
+    fluid
+    style="height: 80vh"
+  >
     <student v-if="userInfo.type === 'student'" />
     <employee v-if="userInfo.type === 'employee'" />
   </v-container>
