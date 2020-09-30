@@ -1,5 +1,25 @@
 <template>
   <v-card width="50rem">
+    <v-dialog v-model="isFined" width="30rem">
+      <v-card class="primaryLight">
+        <v-toolbar color="primaryLight">
+          <v-toolbar-title>User fined</v-toolbar-title>
+        </v-toolbar>
+        <v-card-title>Due Days {{ penaltyInfo.dueDays }}</v-card-title>
+        <v-card-title>Amount {{ penaltyInfo.penalty }}</v-card-title>
+        <v-card-actions class="d-flex justify-end">
+          <v-btn
+            class="primary"
+            large
+            @click="
+              returnInfo.penalityPaidStatus = true;
+              returnBook();
+            "
+            >Pay</v-btn
+          >
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-toolbar color="primaryLight">
       <v-toolbar-title>Welcome {{ userInfo.name }} !</v-toolbar-title>
     </v-toolbar>
@@ -19,7 +39,7 @@
             <v-col cols="12">
               <v-text-field
                 color="accent"
-                v-model="issue.s_id"
+                v-model="issueInfo.s_id"
                 outlined
                 label="Student ID"
                 placeholder="Student ID"
@@ -28,7 +48,7 @@
             <v-col cols="12">
               <v-text-field
                 color="accent"
-                v-model="issue.b_id"
+                v-model="issueInfo.b_id"
                 outlined
                 label="Book ID"
                 placeholder="Book ID"
@@ -46,7 +66,7 @@
             <v-col cols="12">
               <v-text-field
                 color="accent"
-                v-model="issue.s_id"
+                v-model="returnInfo.s_id"
                 outlined
                 label="Student ID"
                 placeholder="Student ID"
@@ -55,15 +75,16 @@
             <v-col cols="12">
               <v-text-field
                 color="accent"
-                v-model="issue.b_id"
+                v-model="returnInfo.b_id"
                 outlined
                 label="Book ID"
                 placeholder="Book ID"
               ></v-text-field>
             </v-col>
             <v-col cols="12" class="d-flex justify-end align-content-end">
-              <v-btn class="secondary mr-5" large> Check Penality </v-btn>
-              <v-btn class="secondary" large disabled> Return </v-btn>
+              <v-btn class="secondary" large @click="returnBook()">
+                Return
+              </v-btn>
             </v-col>
           </v-row>
         </v-form>
@@ -77,7 +98,25 @@
 export default {
   name: "employee",
   data: () => {
-    return { issue: Object, return: Object };
+    return {
+      issueInfo: Object,
+      returnInfo: Object,
+      isFined: false,
+      penaltyInfo: Object,
+    };
+  },
+  methods: {
+    returnBook() {
+      this.isFined = false;
+      this.$store
+        .dispatch("returnBook", this.returnInfo)
+        .then(({ penaltyInfo }) => {
+          if (penaltyInfo) {
+            this.isFined = true;
+            this.penaltyInfo = penaltyInfo;
+          }
+        });
+    },
   },
   computed: {
     userInfo() {

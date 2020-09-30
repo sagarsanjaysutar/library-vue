@@ -99,8 +99,9 @@ router.post("/issue-book", (req, res) => {
             issuedTo: s_id,
             issuedBook: b_id,
             issuedBy: e_id,
+            // dueDate: new Date(new Date().setSeconds(new Date().getSeconds() + 15)),
             dueDate: new Date(
-              new Date().setDate(new Date().getDate() + issueDays)
+              new Date().setSeconds(new Date().getSeconds() + 15)
             ),
             dueDateExtensionNumber: 0,
           };
@@ -162,48 +163,63 @@ router.post("/return-book", (req, res) => {
   );
 
   issueReturnInfo
-    .find({ issuedBook: b_id, issuedTo: s_id, returnedOn: null })
-    .limit(1)
+    .findOne({ issuedBook: b_id, issuedTo: s_id, returnedOn: null })
     .sort({ issuedOn: -1 })
-    .then((transactions) => {
-      if (transactions.length === 1) {
-        const transaction = transactions[0];
+    .then((transaction) => {
+      if (transaction) {
         const currentDate = new Date();
         const isDue = transaction.dueDate - currentDate >= 0 ? false : true;
         if (isDue) {
           const dueDays = currentDate - transaction.dueDate;
           const penalty = dueDays * fineAmount;
-          res.status(200).send({ penalty: { dueDays, penalty } });
+          const penaltyInfo = { dueDays, penalty };
+          console.log(penaltyInfo);
+
           if (penalityPaidStatus) {
             transaction.returnedOn = currentDate;
             transaction.returnedTo = e_id;
             transaction.overDueDays = dueDays;
             transaction.penalityAmount = penalty;
             transaction.penalityPaidStatus = penalityPaidStatus;
-            bookModel
-              .update({ b_id: b_id }, { $inc: { issuedQuantity: -1 } })
-              .then(({ ok }) => {
-                if (ok === 1) {
-                  console.groupEnd();
-                  res.status(200).send({ status: "Fine recieved. Thank you!" });
-                } else {
-                  console.groupEnd();
-                  res.status(400).send({
-                    status:
-                      "Error in returning book,failed to update book quantity.",
+            new issueReturnInfo(transaction)
+              .save()
+              .then((result) => {
+                bookModel
+                  .update({ b_id: b_id }, { $inc: { issuedQuantity: -1 } })
+                  .then(({ ok }) => {
+                    if (ok === 1) {
+                      console.groupEnd();
+                      res
+                        .status(200)
+                        .send({ status: "Fine recieved. Thank you!" });
+                    } else {
+                      console.groupEnd();
+                      res.status(400).send({
+                        status:
+                          "Error in returning book,failed to update book quantity.",
+                      });
+                    }
+                  })
+                  .catch((err) => {
+                    console.log(
+                      "Error in returning book, failed to update book quantity. \n." +
+                        err
+                    );
+                    console.groupEnd();
+                    res.status(400).send({
+                      status: "Error in returning book. \n" + err,
+                    });
                   });
-                }
               })
               .catch((err) => {
-                console.log(
-                  "Error in returning book, failed to update book quantity. \n." +
-                    err
-                );
                 console.groupEnd();
                 res.status(400).send({
-                  status: "Error in returning book. \n" + err,
+                  status:
+                    "Error in returning book,failed to update transaction.",
                 });
               });
+          } else {
+            res.status(200).send({ penaltyInfo: penaltyInfo });
           }
         } else {
           issueReturnInfo
@@ -263,7 +279,7 @@ router.post("/return-book", (req, res) => {
       } else {
         console.log(
           "Error in returning book, failed to retrive transactions.\n" +
-            transactions
+            transaction
         );
         console.groupEnd();
         res.status(400).send({

@@ -60,6 +60,30 @@ export default {
         commit("setStatus", "Opps, something went wrong.\n" + err);
       });
   },
+  returnBook({ commit, state }, returnInfo) {
+    returnInfo.e_id = state.userInfo.u_id;
+    return axios.post("/return", returnInfo).then((response) => {
+      const isFined = response.penaltyInfo ? true : false;
+      if (isFined) {
+        if (returnInfo.penalityPaidStatus) {
+          axios
+            .post("/return", returnInfo)
+            .then((response) => {
+              commit("setStatus", response.status);
+            })
+            .catch((err) => {
+              commit("setStatus", err.response.data.status);
+            });
+        } else {
+          return response;
+        }
+
+        return { isFined: true };
+      } else {
+        commit("setStatus", response.status);
+      }
+    });
+  },
   login({ commit }, data) {
     return axios
       .post("/login", data)
