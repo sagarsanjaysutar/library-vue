@@ -15,4 +15,12 @@ export default {
   setIssuedBooks(state, books) {
     state.books.issuedBooks = books;
   },
+  deleteUsers(state, b_id) {
+    for (let i = 0; i < state.books.searchedBooks.length; i++) {
+      if (state.books.searchedBooks[i].b_id === b_id) {
+        state.books.searchedBooks.splice(i, 1);
+        break;
+      }
+    }
+  }
 };

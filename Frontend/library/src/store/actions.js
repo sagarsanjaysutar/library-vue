@@ -84,6 +84,12 @@ export default {
       }
     });
   },
+  deleteBook({ state }, b_id) {
+    axios.delete("/book", {
+      params: { b_id },
+      headers: { Authorization: `Bearer ${state.userInfo.accessToken}` },
+    });
+  },
   login({ commit }, data) {
     return axios
       .post("/login", data)

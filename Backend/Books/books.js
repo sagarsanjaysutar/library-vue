@@ -82,6 +82,34 @@ router.get("/books/searchedBooks", (req, res) => {
     });
 });
 
+router.delete("/book", ({ query }, res) => {
+  const { b_id } = query;
+  console.group("Deleting " + b_id);
+
+  bookModel
+    .deleteOne({ b_id })
+    .then(({ deletedCount }) => {
+      if (deletedCount) {
+        console.log("Book removed successfully.");
+        console.groupEnd();
+        res.status(200).send({ status: "Book removed successfully." });
+      } else {
+        console.log("No such book found, failed to removed book.");
+        console.groupEnd();
+        res
+          .status(400)
+          .send({ status: "No such book found, failed to removed book." });
+      }
+    })
+    .catch((err) => {
+      console.log("Couldn't delete book.\n" + err);
+      console.groupEnd();
+      res
+        .status(400)
+        .send({ status: "Couldn't delete book." });
+    });
+});
+
 router.post("/issue-book", (req, res) => {
   const { b_id, s_id, e_id } = req.body;
   console.group("Issuing " + b_id + " book for " + s_id + " by " + e_id + ".");
