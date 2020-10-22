@@ -23,9 +23,7 @@ router.get("/books/newBooks", (req, res) => {
     .catch((err) => {
       console.log("Error in fetching new books. \n -- " + err);
       console.groupEnd();
-      res
-        .status(400)
-        .send({ status: "Error in fetching new books.\n -- " + err });
+      res.status(400).send({ status: "Error in fetching new books.\n -- " + err });
     });
 });
 
@@ -60,9 +58,7 @@ router.get("/books/searchedBooks", (req, res) => {
     })
     .then((searchedBooks) => {
       if (searchedBooks) {
-        console.log(
-          "Found " + searchedBooks.length + " containing term " + searchedTerm
-        );
+        console.log("Found " + searchedBooks.length + " containing term " + searchedTerm);
         console.groupEnd();
         res.status(200).send(searchedBooks);
       } else {
@@ -96,17 +92,13 @@ router.delete("/book", ({ query }, res) => {
       } else {
         console.log("No such book found, failed to removed book.");
         console.groupEnd();
-        res
-          .status(400)
-          .send({ status: "No such book found, failed to removed book." });
+        res.status(400).send({ status: "No such book found, failed to removed book." });
       }
     })
     .catch((err) => {
       console.log("Couldn't delete book.\n" + err);
       console.groupEnd();
-      res
-        .status(400)
-        .send({ status: "Couldn't delete book." });
+      res.status(400).send({ status: "Couldn't delete book." });
     });
 });
 
@@ -128,9 +120,7 @@ router.post("/issue-book", (req, res) => {
             issuedBook: b_id,
             issuedBy: e_id,
             // dueDate: new Date(new Date().setSeconds(new Date().getSeconds() + 15)),
-            dueDate: new Date(
-              new Date().setSeconds(new Date().getSeconds() + 15)
-            ),
+            dueDate: new Date(new Date().setSeconds(new Date().getSeconds() + 15)),
             dueDateExtensionNumber: 0,
           };
           new issueReturnInfo(transaction_info).save().then((transaction) => {
@@ -141,22 +131,16 @@ router.post("/issue-book", (req, res) => {
                   if (ok === 1) {
                     console.log("Book issued successfully.");
                     console.groupEnd();
-                    res
-                      .status(200)
-                      .send({ status: "Book issued successfully." });
+                    res.status(200).send({ status: "Book issued successfully." });
                   } else {
                     console.groupEnd();
                     res.status(400).send({
-                      status:
-                        "Error in issuing book,failed to update book quantity.",
+                      status: "Error in issuing book,failed to update book quantity.",
                     });
                   }
                 })
                 .catch((err) => {
-                  console.log(
-                    "Error in issuing book, failed to update book quantity. \n." +
-                      err
-                  );
+                  console.log("Error in issuing book, failed to update book quantity. \n." + err);
                   console.groupEnd();
                   res.status(400).send({
                     status: "Error in returning book. \n" + err,
@@ -164,20 +148,24 @@ router.post("/issue-book", (req, res) => {
                 });
             } else {
               console.log("Failed to issue the book.");
+              console.groupEnd();
               res.status(200).send({ status: "Failed to issue the book." });
             }
           });
         } else {
           console.log(b_id + " book is not available.");
+          console.groupEnd();
           res.status(200).send({ status: b_id + "book is not available." });
         }
       } else {
         console.log(b_id + " book doesn't exists.");
+        console.groupEnd();
         res.status(200).send({ status: b_id + " book doesn't exists." });
       }
     })
     .catch((err) => {
       console.log("Error in issuing book \n." + err);
+      console.groupEnd();
       res.status(400).send({
         status: "Error in issuing book. \n" + err,
       });
@@ -186,13 +174,10 @@ router.post("/issue-book", (req, res) => {
 
 router.post("/return-book", (req, res) => {
   const { b_id, s_id, e_id, penalityPaidStatus } = req.body;
-  console.group(
-    "Returning " + b_id + " book for " + s_id + " by " + e_id + "."
-  );
+  console.group("Returning " + b_id + " book for " + s_id + " by " + e_id + ".");
 
   issueReturnInfo
-    .findOne({ issuedBook: b_id, issuedTo: s_id, returnedOn: null })
-    .sort({ issuedOn: -1 })
+    .find({ issuedBook: b_id, issuedTo: s_id, returnedOn: null })
     .then((transaction) => {
       if (transaction) {
         const currentDate = new Date();
@@ -202,6 +187,7 @@ router.post("/return-book", (req, res) => {
           const penalty = dueDays * fineAmount;
           const penaltyInfo = { dueDays, penalty };
           console.log(penaltyInfo);
+          console.groupEnd();
 
           if (penalityPaidStatus) {
             transaction.returnedOn = currentDate;
@@ -217,21 +203,17 @@ router.post("/return-book", (req, res) => {
                   .then(({ ok }) => {
                     if (ok === 1) {
                       console.groupEnd();
-                      res
-                        .status(200)
-                        .send({ status: "Fine recieved. Thank you!" });
+                      res.status(200).send({ status: "Fine recieved. Thank you!" });
                     } else {
                       console.groupEnd();
                       res.status(400).send({
-                        status:
-                          "Error in returning book,failed to update book quantity.",
+                        status: "Error in returning book,failed to update book quantity.",
                       });
                     }
                   })
                   .catch((err) => {
                     console.log(
-                      "Error in returning book, failed to update book quantity. \n." +
-                        err
+                      "Error in returning book, failed to update book quantity. \n." + err
                     );
                     console.groupEnd();
                     res.status(400).send({
@@ -242,8 +224,7 @@ router.post("/return-book", (req, res) => {
               .catch((err) => {
                 console.groupEnd();
                 res.status(400).send({
-                  status:
-                    "Error in returning book,failed to update transaction.",
+                  status: "Error in returning book,failed to update transaction.",
                 });
               });
           } else {
@@ -268,15 +249,13 @@ router.post("/return-book", (req, res) => {
                     } else {
                       console.groupEnd();
                       res.status(400).send({
-                        status:
-                          "Error in returning book,failed to update book quantity.",
+                        status: "Error in returning book,failed to update book quantity.",
                       });
                     }
                   })
                   .catch((err) => {
                     console.log(
-                      "Error in returning book, failed to update book quantity. \n." +
-                        err
+                      "Error in returning book, failed to update book quantity. \n." + err
                     );
                     console.groupEnd();
                     res.status(400).send({
@@ -286,29 +265,20 @@ router.post("/return-book", (req, res) => {
               } else {
                 console.groupEnd();
                 res.status(400).send({
-                  status:
-                    "Error in returning book,failed to update transaction.",
+                  status: "Error in returning book,failed to update transaction.",
                 });
               }
             })
             .catch((err) => {
-              console.log(
-                "Error in returning book, failed to update  transaction. \n" +
-                  err
-              );
+              console.log("Error in returning book, failed to update  transaction. \n" + err);
               console.groupEnd();
               res.status(400).send({
-                status:
-                  "Error in returning book, failed to update transaction. \n" +
-                  err,
+                status: "Error in returning book, failed to update transaction. \n" + err,
               });
             });
         }
       } else {
-        console.log(
-          "Error in returning book, failed to retrive transactions.\n" +
-            transaction
-        );
+        console.log("Error in returning book, failed to retrive transactions.\n" + transaction);
         console.groupEnd();
         res.status(400).send({
           status: "Error in returning book, failed to retrive transactions",
@@ -329,15 +299,7 @@ router.post("/books", (req, res) => {
   booksArr = req.body;
   booksArr.forEach((book) => {
     if (book.name) {
-      var {
-        name,
-        author,
-        coverPage,
-        genere,
-        isIssued,
-        isReserved,
-        quantity,
-      } = book;
+      var { name, author, coverPage, genere, isIssued, isReserved, quantity } = book;
 
       var newBook = {
         name: name,

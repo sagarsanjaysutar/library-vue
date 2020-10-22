@@ -24,12 +24,7 @@ export default {
       .then((books) => {
         if (books) {
           let bookCount = books.data.length;
-          console.log(
-            "Successfully found " +
-              bookCount +
-              " books in store with " +
-              searchQuery
-          );
+          console.log("Successfully found " + bookCount + " books in store with " + searchQuery);
           commit("setSearchedBooks", books.data);
         } else {
           commit("setStatus", "Something went wrong.");
@@ -46,10 +41,7 @@ export default {
         if (books) {
           let bookCount = books.data.length;
           console.log(
-            "Successfully found " +
-              bookCount +
-              " books in store for " +
-              state.userInfo.name
+            "Successfully found " + bookCount + " books in store for " + state.userInfo.name
           );
           commit("setIssuedBooks", books);
         } else {
@@ -60,29 +52,44 @@ export default {
         commit("setStatus", "Opps, something went wrong.\n" + err);
       });
   },
-  returnBook({ commit, state }, returnInfo) {
-    returnInfo.e_id = state.userInfo.u_id;
-    return axios.post("/return", returnInfo).then((response) => {
-      const isFined = response.penaltyInfo ? true : false;
-      if (isFined) {
-        if (returnInfo.penalityPaidStatus) {
-          axios
-            .post("/return", returnInfo)
-            .then((response) => {
-              commit("setStatus", response.status);
-            })
-            .catch((err) => {
-              commit("setStatus", err.response.data.status);
-            });
-        } else {
-          return response;
-        }
+  returnBook({ commit }, returnInfo) {
+    return axios
+      .post("/return-book", returnInfo)
+      .then((response) => {
+        console.log(response);
+        const isFined = response.penaltyInfo ? true : false;
+        if (isFined) {
+          if (returnInfo.penalityPaidStatus) {
+            axios
+              .post("/return-book", returnInfo)
+              .then((response) => {
+                commit("setStatus", response.data.status);
+              })
+              .catch((err) => {
+                commit("setStatus", err.response.data.status);
+              });
+          } else {
+            return response;
+          }
 
-        return { isFined: true };
-      } else {
-        commit("setStatus", response.status);
-      }
-    });
+          return { isFined: true };
+        } else {
+          commit("setStatus", response.data.status);
+        }
+      })
+      .catch((err) => {
+        commit("setStatus", err.response.data.status);
+      });
+  },
+  issueBook({ commit }, issueInfo) {
+    axios
+      .post("/issue-book", issueInfo)
+      .then((response) => {
+        commit("setStatus", response.data.status);
+      })
+      .catch((err) => {
+        commit("setStatus", err.data.response.status);
+      });
   },
   deleteBook({ state }, b_id) {
     axios.delete("/book", {

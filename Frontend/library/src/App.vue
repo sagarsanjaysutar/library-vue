@@ -9,7 +9,7 @@
       <router-view></router-view>
     </v-container>
 
-    <v-footer dark padless class="primary" elevation="12">
+    <v-footer dark class="primary" elevation="12">
       <v-card class="primary" width="100%" flat tile>
         <v-card-title class="font-weight-regular">
           Get connected with us on social networks!

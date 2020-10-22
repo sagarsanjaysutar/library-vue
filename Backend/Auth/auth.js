@@ -1,8 +1,8 @@
 const express = require("express");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const randomId = require("random-id");
+const bcrypt = require("bcrypt");
 
+const randomId = require("random-id");
 const { userModel } = require("../models/models");
 
 const key = "KAD▓Nih_2q8enudina%d8H@D92q8d#$%^";
@@ -49,6 +49,7 @@ router.post("/login", (req, res) => {
         bcrypt.compare(password, response.password).then((isMatch) => {
           if (isMatch === true) {
             let userInfo = {
+              u_id: response.u_id,
               name: response.name,
               email: response.email,
               type: response.type,
@@ -107,9 +108,7 @@ router.post("/register", (req, res) => {
               new userModel(userInfo).save().then(() => {
                 console.log("Added a new user successfully.");
                 console.log(userInfo);
-                res
-                  .status(200)
-                  .send({ status: "Added a new user successfully." });
+                res.status(200).send({ status: "Added a new user successfully." });
               });
             } else {
               console.log("Please use different email.");

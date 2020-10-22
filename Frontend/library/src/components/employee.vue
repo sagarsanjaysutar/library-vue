@@ -1,19 +1,19 @@
 <template>
-  <v-card width="60rem" height="25rem" color="primary" class="elevation-10">
+  <v-card
+    width="60rem"
+    height="30rem"
+    color="primary"
+    class="elevation-10"
+    style="overflow: hidden"
+  >
     <v-dialog v-model="showDeleteDialog" persistent max-width="25vw">
       <v-card>
         <v-card-title class="mb-1">Delete this book?</v-card-title>
-        <v-card-subtitle
-          >This book will no longer be in system.</v-card-subtitle
-        >
+        <v-card-subtitle>This book will no longer be in system.</v-card-subtitle>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="darken-1" text @click="showDeleteDialog = false"
-            >Cancel</v-btn
-          >
-          <v-btn color="error darken-1" outlined @click="deleteBook(b_id)"
-            >Delete</v-btn
-          >
+          <v-btn color="darken-1" text @click="showDeleteDialog = false">Cancel</v-btn>
+          <v-btn color="error darken-1" outlined @click="deleteBook(b_id)">Delete</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -40,13 +40,7 @@
     <v-toolbar color="primaryLight" elevation="10">
       <v-toolbar-title>Welcome {{ userInfo.name }} !</v-toolbar-title>
     </v-toolbar>
-    <v-tabs
-      vertical
-      background-color="primary"
-      slider-color="primary lighten-5"
-      slider-size="4"
-      class="elevation-10"
-    >
+    <v-tabs vertical background-color="primary" slider-color="primary lighten-5" slider-size="4">
       <v-tab> Issue & Return </v-tab>
 
       <v-tab> Books </v-tab>
@@ -58,7 +52,7 @@
             <v-col cols="12">
               <v-text-field
                 color="accent"
-                v-model="issueInfo.s_id"
+                v-model="s_id"
                 outlined
                 label="Student ID"
                 placeholder="Student ID"
@@ -67,7 +61,7 @@
             <v-col cols="12">
               <v-text-field
                 color="accent"
-                v-model="issueInfo.b_id"
+                v-model="b_id"
                 outlined
                 label="Book ID"
                 placeholder="Book ID"
@@ -100,20 +94,30 @@
             </template>
           </v-text-field>
           <v-card-subtitle>Search, add or delete books.</v-card-subtitle>
-          <v-list style="height: 20rem; overflow-y: scroll" class="primary">
+          <v-list style="height: 18rem; overflow-y: scroll" class="primary">
             <v-list-item
               v-if="
-                filteredBooks.length === 0 ||
-                filteredBooks === null ||
-                filteredBooks === undefined
+                filteredBooks.length === 0 || filteredBooks === null || filteredBooks === undefined
               "
-              >No books added yet.</v-list-item
-            >
-            <v-list-item
-              v-for="(book, index) in filteredBooks"
-              :key="index"
-              dense
-            >
+              >No books added yet.
+            </v-list-item>
+            <v-list-item>
+              <v-list-item-content>
+                <v-list-item-subtitle class="text-center">Name </v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-content>
+                <v-list-item-subtitle class="text-center"
+                  >Location
+                </v-list-item-subtitle> </v-list-item-content
+              ><v-list-item-content>
+                <v-list-item-subtitle class="text-center">Quantity </v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-content>
+                <v-list-item-subtitle class="text-center"> </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+
+            <v-list-item v-for="book in filteredBooks" :key="book.b_id" dense>
               <v-card
                 width="100%"
                 class="mb-2 d-flex primaryLight"
@@ -123,9 +127,6 @@
               >
                 <v-list style="width: 100%" class="pa-0 primaryLight">
                   <v-list-item>
-                    <v-list-item-avatar size="50" color="grey">
-                      <v-img :src="book.coverPage" />
-                    </v-list-item-avatar>
                     <v-list-item-content>
                       <v-list-item-title class
                         >{{ book.name }},
@@ -135,14 +136,10 @@
                       </v-list-item-title>
                     </v-list-item-content>
                     <v-list-item-content>
-                      <v-list-item-subtitle
-                        >{{ book.location }}
-                      </v-list-item-subtitle>
+                      <v-list-item-subtitle>{{ book.location }} </v-list-item-subtitle>
                     </v-list-item-content>
                     <v-list-item-content>
-                      <v-list-item-subtitle>{{
-                        book.totalQuantity
-                      }}</v-list-item-subtitle>
+                      <v-list-item-subtitle>{{ book.totalQuantity }}</v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
                 </v-list>
@@ -186,31 +183,43 @@
 export default {
   name: "employee",
   data: () => {
-    return {
-      issueInfo: Object,
-      returnInfo: Object,
+    return {      
       isFined: false,
-      penaltyInfo: Object,
+      penaltyInfo: {},
       searchedBook: "",
-      b_id: String,
+      b_id: "",
+      s_id:"",
       showDeleteDialog: false,
     };
   },
   methods: {
+    issueBook() {
+      const issueInfo = {
+        b_id:this.b_id,
+        s_id:this.s_id,
+        e_id:this.userInfo.u_id
+      }      
+      this.$store.dispatch("issueBook", issueInfo);
+      this.issueInfo = {};
+    },
     returnBook() {
+       const returnInfo = {
+        b_id:this.b_id,
+        s_id:this.s_id,
+        e_id:this.userInfo.u_id
+      }
       this.isFined = false;
-      this.$store
-        .dispatch("returnBook", this.returnInfo)
-        .then(({ penaltyInfo }) => {
-          if (penaltyInfo) {
-            this.isFined = true;
-            this.penaltyInfo = penaltyInfo;
-          }
-        });
+      this.$store.dispatch("returnBook", returnInfo).then(({ penaltyInfo }) => {
+        if (penaltyInfo) {
+          this.isFined = true;
+          this.penaltyInfo = penaltyInfo;
+        }
+      });
+      this.issueInfo = {};
     },
     deleteBook() {
       this.showDeleteDialog = false;
-      this.$store.dispatch("deleteBook", this.b_id)
+      this.$store.dispatch("deleteBook", this.b_id);
     },
   },
   created() {
