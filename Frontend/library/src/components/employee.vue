@@ -1,35 +1,37 @@
 <template>
   <v-card
     width="60rem"
-    height="30rem"
+    height="35rem"
     color="primary"
     class="elevation-10"
     style="overflow: hidden"
   >
-    <v-dialog v-model="showDeleteDialog" persistent max-width="25vw">
-      <v-card>
+    <v-dialog v-model="isDeleteDialogOpen" persistent max-width="25vw">
+      <v-card class="primaryLight">
         <v-card-title class="mb-1">Delete this book?</v-card-title>
         <v-card-subtitle>This book will no longer be in system.</v-card-subtitle>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="darken-1" text @click="showDeleteDialog = false">Cancel</v-btn>
-          <v-btn color="error darken-1" outlined @click="deleteBook(b_id)">Delete</v-btn>
+          <v-btn color="darken-1" text @click="isDeleteDialogOpen = false">Cancel</v-btn>
+          <v-btn color="primary" @click="deleteBook(b_id)">Delete</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="isFined" width="30rem">
+    <v-dialog v-model="isFineDialogOpen" width="25vw">
       <v-card class="primaryLight">
-        <v-toolbar color="primaryLight">
-          <v-toolbar-title>User fined</v-toolbar-title>
-        </v-toolbar>
-        <v-card-title>Due Days {{ penaltyInfo.dueDays }}</v-card-title>
-        <v-card-title>Amount {{ penaltyInfo.penalty }}</v-card-title>
-        <v-card-actions class="d-flex justify-end">
+        <v-card-title>User fined</v-card-title>
+        <v-card-text
+          >Due Days : {{ penaltyInfo.dueDays }}
+          <br />
+          Amount : {{ penaltyInfo.penalty }}
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
           <v-btn
             class="primary"
-            large
             @click="
-              returnInfo.penalityPaidStatus = true;
+              penalityPaidStatus = true;
               returnBook();
             "
             >Pay</v-btn
@@ -37,20 +39,98 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="isAddOrEditBookOpen" width="30rem" persistent>
+      <addOrEditBook
+        :selectedBook="selectedBook"
+        @isAddOrEditBookOpen="
+          isAddOrEditBookOpen = $event;
+          selectedBook = {};
+        "
+      />
+    </v-dialog>
     <v-toolbar color="primaryLight" elevation="10">
       <v-toolbar-title>Welcome {{ userInfo.name }} !</v-toolbar-title>
     </v-toolbar>
     <v-tabs vertical background-color="primary" slider-color="primary lighten-5" slider-size="4">
-      <v-tab> Issue & Return </v-tab>
-
       <v-tab> Books </v-tab>
+      <v-tab> Issue & Return </v-tab>
+      <v-tab-item class="pa-3 primary">
+        <v-data-table
+          :headers="headers"
+          :items="books"
+          :search="searchedBook"
+          class="primary elevation-5"
+          :items-per-page="5"
+          hide-default-footer
+        >
+          <template v-slot:top="{ pagination, options, updateOptions }">
+            <v-toolbar class="primary" flat>
+              <v-toolbar-title>
+                Books
+              </v-toolbar-title>
+              <v-spacer></v-spacer>
 
+              <v-text-field
+                dense
+                hide-details
+                v-model="searchedBook"
+                background-color="primaryLight"
+                solo
+                outlined
+                placeholder="Search books"
+              >
+                <template v-slot:append>
+                  <v-btn icon class="mr-2"><v-icon>mdi-magnify</v-icon></v-btn>
+                </template>
+              </v-text-field>
+
+              <v-spacer></v-spacer>
+              <v-btn class="primaryLight" @click="isAddOrEditBookOpen = true">
+                Add book
+                <v-icon>mdi-plus</v-icon>
+              </v-btn>
+            </v-toolbar>
+            <v-data-footer
+              :pagination="pagination"
+              :options="options"
+              @update:options="updateOptions"
+              items-per-page-text=""
+              :items-per-page-options="[5]"
+            />
+          </template>
+          <template v-slot:item.name="{ item }">
+            <v-list-item class="d-flex">
+              <v-list-item-content>
+                <v-list-item-title> {{ item.name }}</v-list-item-title>
+                <v-list-item-subtitle>{{ item.author }} • {{ item.genere }} </v-list-item-subtitle>
+              </v-list-item-content>
+            </v-list-item>
+          </template>
+          <template v-slot:item.actions="{ item }">
+            <v-btn icon small color="info " @click.stop="setSelectedBook(item.b_id)">
+              <v-icon small>mdi-pencil</v-icon>
+            </v-btn>
+            <v-btn
+              icon
+              small
+              color="red"
+              @click="
+                isDeleteDialogOpen = true;
+                b_id = item.b_id;
+              "
+            >
+              <v-icon small>mdi-delete</v-icon>
+            </v-btn>
+          </template>
+        </v-data-table>
+      </v-tab-item>
       <v-tab-item class="primary">
         <v-card-title>Issue or return book.</v-card-title>
         <v-form class="pa-5">
           <v-row>
             <v-col cols="12">
               <v-text-field
+                hide-details
                 color="accent"
                 v-model="s_id"
                 outlined
@@ -60,6 +140,7 @@
             ></v-col>
             <v-col cols="12">
               <v-text-field
+                hide-details
                 color="accent"
                 v-model="b_id"
                 outlined
@@ -78,12 +159,109 @@
           </v-row>
         </v-form>
       </v-tab-item>
-      <v-tab-item>
-        <v-card class="primary pa-5">
+    </v-tabs>
+  </v-card>
+</template>
+
+<script>
+import addOrEditBook from "./addOrEditBook";
+export default {
+  name: "employee",
+  components: {
+    addOrEditBook,
+  },
+  data: () => {
+    return {
+      isDeleteDialogOpen: false,
+      isFineDialogOpen: false,
+      isAddOrEditBookOpen: false,
+      penalityPaidStatus: false,
+      selectedBook: {},
+      penaltyInfo: {},
+      searchedBook: "",
+      b_id: "",
+      s_id: "",
+      headers: [
+        { text: "Name", value: "name", sortable: false, align: "start" },
+        { text: "Location ", value: "location", sortable: false, align: "center" },
+        { text: "Quantity ", value: "totalQuantity", sortable: false, align: "center" },
+        { text: "Actions", value: "actions", sortable: false, align: "center" },
+      ],
+    };
+  },
+  methods: {
+    issueBook() {
+      const issueInfo = {
+        b_id: this.b_id,
+        s_id: this.s_id,
+        e_id: this.userInfo.u_id,
+      };
+      this.$store.dispatch("issueBook", issueInfo);
+      this.issueInfo = {};
+    },
+    returnBook() {
+      const returnInfo = {
+        b_id: this.b_id,
+        s_id: this.s_id,
+        e_id: this.userInfo.u_id,
+        penalityPaidStatus: this.penalityPaidStatus,
+      };
+      this.isFineDialogOpen = false;
+      this.$store
+        .dispatch("returnBook", returnInfo)
+        .then((penaltyInfo) => {
+          if (penaltyInfo) {
+            this.isFineDialogOpen = true;
+            this.penaltyInfo = penaltyInfo;
+          }
+        })
+        .catch((err) => {
+          this.$store.commit("setStatus", err);
+        });
+      this.issueInfo = {};
+    },
+    deleteBook() {
+      this.isDeleteDialogOpen = false;
+      this.$store.dispatch("deleteBook", this.b_id);
+    },
+    setSelectedBook(b_id) {
+      for (const book of this.books) {
+        if (book.b_id === b_id) {
+          this.selectedBook = book;
+          break;
+        }
+      }
+      this.isAddOrEditBookOpen = !this.isAddOrEditBookOpen;
+    },
+  },
+  created() {
+    this.$store.dispatch("getAllBooks");
+  },
+  computed: {
+    userInfo() {
+      return this.$store.state.userInfo;
+    },
+    books() {
+      return this.$store.state.books.all;
+    },
+  },
+};
+</script>
+
+<style scoped>
+.add-books {
+  height: 10rem;
+  width: 10rem;
+  display: flex;
+  flex-direction: column;
+}
+</style>
+
+<!-- <v-card class="primary pa-5" elevation="0">
           <v-text-field
+            hide-details
             v-model="searchedBook"
             background-color="primaryLight"
-            hide-details=""
             solo
             outlined
             placeholder="Search books"
@@ -94,7 +272,7 @@
             </template>
           </v-text-field>
           <v-card-subtitle>Search, add or delete books.</v-card-subtitle>
-          <v-list style="height: 18rem; overflow-y: scroll" class="primary">
+          <v-list style="height: 22rem; overflow-y: scroll" class="primary">
             <v-list-item
               v-if="
                 filteredBooks.length === 0 || filteredBooks === null || filteredBooks === undefined
@@ -117,15 +295,9 @@
               </v-list-item-content>
             </v-list-item>
 
-            <v-list-item v-for="book in filteredBooks" :key="book.b_id" dense>
-              <v-card
-                width="100%"
-                class="mb-2 d-flex primaryLight"
-                outlined
-                elevation="8"
-                :ref="book._id"
-              >
-                <v-list style="width: 100%" class="pa-0 primaryLight">
+            <v-list-item v-for="book in filteredBooks" :key="book.b_id">
+              <v-card width="100%" class="primary" elevation="0" :ref="book._id">
+                <v-list style="width: 100%" class="pa-0 primary">
                   <v-list-item>
                     <v-list-item-content>
                       <v-list-item-title class
@@ -141,111 +313,34 @@
                     <v-list-item-content>
                       <v-list-item-subtitle>{{ book.totalQuantity }}</v-list-item-subtitle>
                     </v-list-item-content>
+                    <v-list-item-action class="d-flex" style="flex-direction:row">
+                      <v-btn
+                        icon
+                        small
+                        color="info "
+                        @click.stop="
+                          isEditable = !isEditable;
+                          setInfo(book._id);
+                        "
+                      >
+                        <v-icon small>mdi-pencil</v-icon>
+                      </v-btn>
+                      <v-btn
+                        icon
+                        small
+                        color="red"
+                        @click="
+                          isDeleteDialogOpen = true;
+                          b_id = book.b_id;
+                        "
+                      >
+                        <v-icon small>mdi-delete</v-icon>
+                      </v-btn>
+                    </v-list-item-action>
                   </v-list-item>
                 </v-list>
-                <v-card-actions class="align-center justify-start d-flex pl-0">
-                  <v-btn
-                    icon
-                    small
-                    color="info "
-                    outlined
-                    :style="book.role === 'admin' ? 'margin-right: 40px' : ''"
-                    @click.stop="
-                      isEditable = !isEditable;
-                      setInfo(book._id);
-                    "
-                  >
-                    <v-icon small>mdi-pencil</v-icon>
-                  </v-btn>
-                  <v-btn
-                    icon
-                    small
-                    color="red"
-                    outlined
-                    @click="
-                      showDeleteDialog = true;
-                      b_id = book.b_id;
-                    "
-                  >
-                    <v-icon small>mdi-delete</v-icon>
-                  </v-btn>
-                </v-card-actions>
               </v-card>
             </v-list-item>
+            <v-divider :inset="inset" light></v-divider>
           </v-list>
-        </v-card>
-      </v-tab-item>
-    </v-tabs>
-  </v-card>
-</template>
-
-<script>
-export default {
-  name: "employee",
-  data: () => {
-    return {      
-      isFined: false,
-      penaltyInfo: {},
-      searchedBook: "",
-      b_id: "",
-      s_id:"",
-      showDeleteDialog: false,
-    };
-  },
-  methods: {
-    issueBook() {
-      const issueInfo = {
-        b_id:this.b_id,
-        s_id:this.s_id,
-        e_id:this.userInfo.u_id
-      }      
-      this.$store.dispatch("issueBook", issueInfo);
-      this.issueInfo = {};
-    },
-    returnBook() {
-       const returnInfo = {
-        b_id:this.b_id,
-        s_id:this.s_id,
-        e_id:this.userInfo.u_id
-      }
-      this.isFined = false;
-      this.$store.dispatch("returnBook", returnInfo).then(({ penaltyInfo }) => {
-        if (penaltyInfo) {
-          this.isFined = true;
-          this.penaltyInfo = penaltyInfo;
-        }
-      });
-      this.issueInfo = {};
-    },
-    deleteBook() {
-      this.showDeleteDialog = false;
-      this.$store.dispatch("deleteBook", this.b_id);
-    },
-  },
-  created() {
-    this.$store.dispatch("getSearchedBooks", "");
-  },
-  computed: {
-    userInfo() {
-      return this.$store.state.userInfo;
-    },
-    books() {
-      return this.$store.state.books.searchedBooks;
-    },
-    filteredBooks() {
-      return this.books.filter((book) => {
-        return book.name.toLowerCase().match(this.searchedBook.toLowerCase());
-      });
-    },
-  },
-};
-</script>
-
-<style scoped>
-.add-books {
-  height: 10rem;
-  width: 10rem;
-  display: flex;
-  flex-direction: column;
-}
-</style>
+        </v-card> -->

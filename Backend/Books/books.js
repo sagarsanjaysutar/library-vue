@@ -26,31 +26,32 @@ router.get("/books/newBooks", (req, res) => {
       res.status(400).send({ status: "Error in fetching new books.\n -- " + err });
     });
 });
-
 router.get("/books/issuedBooks", (req, res) => {
-  const u_id = req.query.getIssuedBooks.u_id || "";
-  console.group("Searching issued books for " + u_id);
+  const u_id = req.query.u_id;
+  console.group("Getting issued books for " + u_id);
+
   issueReturnInfo
-    .find({ u_id })
+    .find({ issuedTo: u_id })
     .then((books) => {
       console.log("Found " + books.length + " books issued.");
+      console.groupEnd();
       res.status(200).send(books);
     })
     .catch((err) => {
       console.log("Couldn't get issued books for " + id + ".\n" + err);
-
+      console.groupEnd();
       res.status(400).send({
         status: "Couldn't get issued books for " + id + ".\n" + err,
       });
     });
 });
-
 router.get("/books/searchedBooks", (req, res) => {
   const searchedTerm = req.query.searchQuery;
   console.group("Searching book " + searchedTerm + " in db.");
   bookModel
     .find({
       $or: [
+        { b_id: searchedTerm },
         { name: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
         { author: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
         { genere: { $regex: ".*" + searchedTerm + ".*", $options: "i" } },
@@ -78,6 +79,29 @@ router.get("/books/searchedBooks", (req, res) => {
     });
 });
 
+router.post("/book", (req, res) => {
+  let book = req.body;
+  console.group("Adding a new book :- " + book.name);
+  book.b_id = "B_" + randomId(8, "aA0");
+  book.coverPage = "https://m.media-amazon.com/images/I/71d3kAiuhLL._AC_UY327_QL65_.jpg";
+  new bookModel(book)
+    .save()
+    .then(() => {
+      console.log(book.name + " added successfully.");
+      console.groupEnd();
+      res.status(200).send({
+        status: book.name + " added successfully.",
+        b_id: book.b_id,
+      });
+    })
+    .catch((err) => {
+      console.log("Error in adding book \n --" + err);
+      console.groupEnd();
+      res.status(406).send({
+        status: "Error in adding book \n --" + err,
+      });
+    });
+});
 router.delete("/book", ({ query }, res) => {
   const { b_id } = query;
   console.group("Deleting " + b_id);
@@ -101,6 +125,28 @@ router.delete("/book", ({ query }, res) => {
       res.status(400).send({ status: "Couldn't delete book." });
     });
 });
+router.put("/book", (req, res) => {
+  let book = req.body;
+  console.group("Editing book:- " + book.name);
+  bookModel
+    .updateOne({ b_id: book.b_id }, { $set: book })
+    .then(({ nModified }) => {
+      if (nModified > 0) {
+        console.log("Updated book ");
+        console.groupEnd();
+        res.status(200).send({ status: "Updated book details successfully." });
+      } else {
+        console.log("Update failed");
+        console.groupEnd();
+        res.status(401).send({ status: "Updated failed." });
+      }
+    })
+    .catch((err) => {
+      console.log("Problem in server. Couldn't update users.\n" + err);
+      console.groupEnd();
+      res.status(500).send({ status: "Opps! Something went wrong." + err });
+    });
+});
 
 router.post("/issue-book", (req, res) => {
   const { b_id, s_id, e_id } = req.body;
@@ -108,8 +154,8 @@ router.post("/issue-book", (req, res) => {
   bookModel.findOne({ b_id }).then((book) => {
     userModel
       .findOne({ u_id: s_id })
-      .then((response) => {
-        if (response) {
+      .then((user) => {
+        if (user) {
           if (book) {
             const { totalQuantity, issuedQuantity } = book;
             const isBookAvaiblable = issuedQuantity < totalQuantity ? true : false;
@@ -121,8 +167,8 @@ router.post("/issue-book", (req, res) => {
                 issuedTo: s_id,
                 issuedBook: b_id,
                 issuedBy: e_id,
-                // dueDate: new Date(new Date().setSeconds(new Date().getSeconds() + 15)),
                 dueDate: new Date(new Date().setDate(new Date().getDate() + 7)),
+                // dueDate: new Date(new Date().setSeconds(new Date().getSeconds() + 7)),
                 dueDateExtensionNumber: 0,
               };
               new issueReturnInfo(transaction_info).save().then((transaction) => {
@@ -181,7 +227,6 @@ router.post("/issue-book", (req, res) => {
       });
   });
 });
-
 router.post("/return-book", (req, res) => {
   const { b_id, s_id, e_id, penalityPaidStatus } = req.body;
   console.group("Returning " + b_id + " book for " + s_id + " by " + e_id + ".");
@@ -189,7 +234,6 @@ router.post("/return-book", (req, res) => {
   issueReturnInfo
     .findOne({ issuedBook: b_id, issuedTo: s_id, returnedOn: null })
     .then((transaction) => {
-      console.log(transaction);
       if (transaction) {
         const currentDate = new Date();
         const isDue = transaction.dueDate - currentDate >= 0 ? false : true;
@@ -302,47 +346,50 @@ router.post("/return-book", (req, res) => {
       res.status(400).send({ status: "Error in returning book. \n" + err });
     });
 });
-
-
-module.exports = router;
-
-router.post("/books", (req, res) => {
-  var booksArr = Array();
-  booksArr = req.body;
-  booksArr.forEach((book) => {
-    if (book.name) {
-      var { name, author, coverPage, genere, isIssued, isReserved, quantity } = book;
-
-      var newBook = {
-        name: name,
-        author: author,
-        coverPage: coverPage,
-        genere: genere,
-        isIssued: isIssued,
-        isReserved: isReserved,
-        quantity: quantity,
-      };
-
-      bookModel
-        .insertMany(newBook)
-        .then((response) => {
-          console.log(newBook.name + " added successfully.");
+router.post("/reissue-book", (req, res) => {
+  const { t_id } = req.body;
+  console.group("Reissuing book " + t_id);
+  issueReturnInfo
+    .findOne({ t_id })
+    .then((transaction) => {
+      if (transaction) {
+        if (transaction.dueDateExtensionNumber < 3) {
+          transaction.dueDateExtensionNumber += 1;
+          transaction.dueDate = new Date(new Date().setDate(new Date().getDate() + 8));
+          new issueReturnInfo(transaction)
+            .save()
+            .then(() => {
+              console.log("Re-issued book successfully.");
+              res.status(200).send({
+                status: "Re-issued book successfully.",
+                dueDate: transaction.dueDate,
+              });
+            })
+            .catch((err) => {
+              console.log("Error in reissuing book \n." + err);
+              console.groupEnd();
+              res.status(400).send({ status: "Error in reissuing book. \n" + err });
+            });
+        } else {
+          console.log("Maximum re-issuing is done, please visit library.");
+          console.groupEnd();
           res.status(200).send({
-            status: newBook.name + " added successfully.",
+            status: "Maximum re-issuing is done, please visit library.",
           });
-        })
-        .catch((err) => {
-          console.log("Error in adding book \n --" + err);
-          res.status(406).send({
-            status: "Error in adding book \n --" + err,
-          });
+        }
+      } else {
+        console.log("Error in returning book, failed to retrive transactions.\n" + transaction);
+        console.groupEnd();
+        res.status(400).send({
+          status: "Error in reissuing book, failed to retrive transactions",
         });
-    } else {
-      console.log("Invalid Data");
-      res.status(406).send({
-        status: "Invalid Data.",
-      });
-    }
-  });
+      }
+    })
+    .catch((err) => {
+      console.log("Error in reissuing book \n." + err);
+      console.groupEnd();
+      res.status(400).send({ status: "Error in reissuing book. \n" + err });
+    });
 });
 
+module.exports = router;

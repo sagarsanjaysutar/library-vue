@@ -6,21 +6,48 @@ export default {
   setUserInfo(state, userInfo) {
     state.userInfo = userInfo;
   },
-  setSearchedBooks(state, searchedBooks) {
-    state.books.searchedBooks = searchedBooks;
+  setSearchedBooks(state, books) {
+    state.books.searchedBooks = books;
   },
-  setNewBook(state, newBooks) {
-    state.books.newBooks = newBooks;
+  setAllBooks(state, books) {
+    state.books.all = books;
+  },
+  setNewBook(state, books) {
+    state.books.newBooks = books;
   },
   setIssuedBooks(state, books) {
-    state.books.issuedBooks = books;
+    if (books.length > 0) {
+      state.books.issuedBooks = books;
+    } else {
+      state.books.issuedBooks.push(books);
+    }
   },
-  deleteUsers(state, b_id) {
-    for (let i = 0; i < state.books.searchedBooks.length; i++) {
-      if (state.books.searchedBooks[i].b_id === b_id) {
-        state.books.searchedBooks.splice(i, 1);
+  editIssuedBooks(state, data) {
+    for (let i = 0; i < state.books.issuedBooks.length; i++) {
+      if (state.books.issuedBooks[i].t_id === data.t_id) {
+        let bookInfo = state.books.issuedBooks[i];
+        bookInfo.dueDate = data.dueDate;
+        state.books.issuedBooks.splice(i, 1, bookInfo);
+      }
+    }
+  },
+  deleteBook(state, b_id) {
+    for (let i = 0; i < state.books.all.length; i++) {
+      if (state.books.all[i].b_id === b_id) {
+        state.books.all.splice(i, 1);
         break;
       }
     }
-  }
+  },
+  addBook(state, book) {
+    state.books.all.push(book);
+  },
+  editBook(state, book) {
+    for (let i = 0; i < state.books.all.length; i++) {
+      if (state.books.all[i]["b_id"] === book["b_id"]) {
+        state.books.all.splice(i, 1, book);
+        break;
+      }
+    }
+  },
 };

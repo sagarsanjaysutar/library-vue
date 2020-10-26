@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-snackbar v-model="status.show" top elevation="24" color="grey ">
+    <v-snackbar v-model="status.show" top elevation="24" color="secondary" light>
       {{ status.value }}
     </v-snackbar>
     <navbar />
@@ -9,16 +9,15 @@
       <router-view></router-view>
     </v-container>
 
-    <v-footer dark class="primary" elevation="12">
-      <v-card class="primary" width="100%" flat tile>
-        <v-card-title class="font-weight-regular">
-          Get connected with us on social networks!
+    <v-footer dark class="primary" elevation="12" padless>
+      <v-card class="primaryLight d-flex" width="100%">
+        <v-list-item>
+          <v-list-item-subtitle>Get connected with us on social networks!</v-list-item-subtitle>
           <v-spacer></v-spacer>
-
-          <v-btn class="mx-4" dark icon>
+          <v-btn class="mx-4" dark icon small>
             <v-icon size="24px">mdi-linkedin</v-icon>
           </v-btn>
-        </v-card-title>
+        </v-list-item>
       </v-card>
     </v-footer>
   </v-app>
@@ -28,6 +27,11 @@
 import navbar from "./components/navbar";
 export default {
   name: "App",
+  data: () => {
+    return {
+      a: true,
+    };
+  },
   components: {
     navbar,
   },

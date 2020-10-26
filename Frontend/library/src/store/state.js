@@ -1,5 +1,6 @@
 export default {
   books: {
+    all: [],
     searchedBooks: [],
     newBooks: [],
     issuedBooks: [],

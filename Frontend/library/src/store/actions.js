@@ -18,14 +18,12 @@ export default {
         commit("setStatus", "Opps, something went wrong.\n" + err);
       });
   },
-  getSearchedBooks({ commit }, searchQuery) {
+  getAllBooks({ commit }) {
     axios
-      .get("/books/searchedBooks", { params: { searchQuery: searchQuery } })
+      .get("/books/searchedBooks", { params: { searchQuery: "" } })
       .then((books) => {
         if (books) {
-          let bookCount = books.data.length;
-          console.log("Successfully found " + bookCount + " books in store with " + searchQuery);
-          commit("setSearchedBooks", books.data);
+          commit("setAllBooks", books.data);
         } else {
           commit("setStatus", "Something went wrong.");
         }
@@ -34,16 +32,34 @@ export default {
         commit("setStatus", "Opps, something went wrong.\n" + err);
       });
   },
-  getIssuedBooks({ commit, state }) {
-    axios
-      .get("/books/issuedBooks", { params: { userInfo: state.userInfo.id } })
+  getSearchedBooks({ commit }, searchQuery) {
+    return axios
+      .get("/books/searchedBooks", { params: { searchQuery: searchQuery } })
       .then((books) => {
         if (books) {
-          let bookCount = books.data.length;
-          console.log(
-            "Successfully found " + bookCount + " books in store for " + state.userInfo.name
-          );
-          commit("setIssuedBooks", books);
+          commit("setSearchedBooks", books.data);
+          return books.data;
+        } else {
+          commit("setStatus", "Something went wrong.");
+        }
+      })
+      .catch((err) => {
+        commit("setStatus", "Opps, something went wrong.\n" + err);
+      });
+  },
+  getIssuedBooks({ commit, dispatch, state }) {
+    axios
+      .get("/books/issuedBooks", { params: { u_id: state.userInfo.u_id } })
+      .then((books) => {
+        if (books) {
+          for (let i = 0; i < books.data.length; i++) {
+            dispatch("getSearchedBooks", books.data[i].issuedBook).then((book) => {
+              books.data[i].name = book[0].name;
+              books.data[i].author = book[0].author;
+              books.data[i].genere = book[0].genere;
+            });
+          }
+          commit("setIssuedBooks", books.data);
         } else {
           commit("setStatus", "Something went wrong.");
         }
@@ -57,7 +73,8 @@ export default {
       .post("/return-book", returnInfo)
       .then((response) => {
         console.log(response);
-        const isFined = response.penaltyInfo ? true : false;
+        const isFined = response.data.penaltyInfo ? true : false;
+        console.log(isFined);
         if (isFined) {
           if (returnInfo.penalityPaidStatus) {
             axios
@@ -69,10 +86,9 @@ export default {
                 commit("setStatus", err.response.data.status);
               });
           } else {
-            return response;
+            console.log("x");
+            return response.data.penaltyInfo;
           }
-
-          return { isFined: true };
         } else {
           commit("setStatus", response.data.status);
         }
@@ -88,15 +104,65 @@ export default {
         commit("setStatus", response.data.status);
       })
       .catch((err) => {
-        commit("setStatus", err.data.response.status);
+        commit("setStatus", err.response.data.status);
       });
   },
-  deleteBook({ state }, b_id) {
-    axios.delete("/book", {
-      params: { b_id },
-      headers: { Authorization: `Bearer ${state.userInfo.accessToken}` },
-    });
+  reissueBook({ commit }, t_id) {
+    axios
+      .post("/reissue-book", { t_id })
+      .then((response) => {
+        commit("setStatus", response.data.status);
+        commit("setIssuedBooks", response.data.dueDate);
+      })
+      .catch((err) => {
+        commit("setStatus", err.response.data.status);
+      });
   },
+  deleteBook({ commit }, b_id) {
+    console.log("Deleting book. " + b_id);
+    axios
+      .delete("/book", {
+        params: { b_id },
+      })
+      .then((res) => {
+        commit("setStatus", res.data.status);
+        commit("deleteBook", b_id);
+      })
+      .catch((err) => {
+        commit("setStatus", "Opps, something went wrong.\n" + err);
+      });
+  },
+  addBook({ commit }, book) {
+    console.log("Adding book :-" + book.name);
+    axios
+      .post("/book", book)
+      .then((res) => {
+        if (res.status === 200) {
+          commit("setStatus", res.data.status);
+          book.b_id = res.data.b_id;
+          commit("addBook", book);
+        }
+      })
+      .catch((e) => {
+        commit("setStatus", { value: e.response.data.status });
+      });
+  },
+  editBook({ commit }, book) {
+    console.log("Editing book :-" + book.name);
+    axios
+      .put("/book", book)
+      .then(({ data, status }) => {
+        if (status === 200) {
+          commit("setStatus", data.status);
+          commit("editBook", book);
+        }
+      })
+      .catch((e) => {
+        console.log(e);
+        commit("setStatus", e.response.data.status);
+      });
+  },
+
   login({ commit }, data) {
     return axios
       .post("/login", data)
@@ -129,7 +195,7 @@ export default {
       .post("/logout", state.userInfo)
       .then((response) => {
         commit("setUserInfo", {});
-        commit("setStatus", response.data);
+        commit("setStatus", response.data.status);
       })
       .catch((err) => {
         commit("setStatus", err);
