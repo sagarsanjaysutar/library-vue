@@ -5,21 +5,16 @@
         <v-card-title class="headline">Ready to Leave?</v-card-title>
 
         <v-card-text
-          >Select "Logout" below if you are ready to end your current
-          session.</v-card-text
+          >Select "Logout" below if you are ready to end your current session.</v-card-text
         >
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="darken-1" text @click="showLogOut = false"
-            >Cancel</v-btn
-          >
+          <v-btn color="darken-1" text @click="showLogOut = false">Cancel</v-btn>
           <v-btn color="secondary" @click="logout">Logout</v-btn>
         </v-card-actions>
       </v-card></v-dialog
     >
-    <v-dialog v-model="showLogin" max-width="30rem"
-      ><login @close="showLogin = !$event"
-    /></v-dialog>
+    <v-dialog v-model="showLogin" max-width="30rem"><login @close="showLogin = !$event"/></v-dialog>
     <nav>
       <v-toolbar class="primary" elevation="10">
         <v-toolbar-title class="secondaryLight--text">Library</v-toolbar-title>
@@ -42,9 +37,7 @@
             <template v-slot:activator="{ on }">
               <v-btn icon large v-on="on">
                 <v-avatar size="32px" item>
-                  <v-img
-                    src="https://cdn.vuetifyjs.com/images/john.png"
-                  ></v-img>
+                  <v-img src="https://cdn.vuetifyjs.com/images/john.png"></v-img>
                 </v-avatar>
               </v-btn>
             </template>
@@ -52,20 +45,14 @@
               <v-list class="primaryLight">
                 <v-list-item>
                   <v-list-item-avatar size="100">
-                    <v-img
-                      src="https://cdn.vuetifyjs.com/images/john.png"
-                    ></v-img>
+                    <v-img src="https://cdn.vuetifyjs.com/images/john.png"></v-img>
                   </v-list-item-avatar>
                   <v-list-item-content>
                     <v-list-item-title class="title"
                       >{{ $store.state.userInfo.name }}
                     </v-list-item-title>
-                    <v-list-item-subtitle
-                      >{{ $store.state.userInfo.email }}
-                    </v-list-item-subtitle>
-                    <v-list-item-subtitle>{{
-                      $store.state.userInfo.type
-                    }}</v-list-item-subtitle>
+                    <v-list-item-subtitle>{{ $store.state.userInfo.email }} </v-list-item-subtitle>
+                    <v-list-item-subtitle>{{ $store.state.userInfo.type }}</v-list-item-subtitle>
                   </v-list-item-content>
                 </v-list-item>
 
@@ -130,15 +117,15 @@ export default {
       });
     },
     getSearchedBooks() {
-      //   const newPath = `/searchedResults?search=${this.searchQuery}`;
-      //   const currentPath = `/searchedResults?search=${this.$route.query.search}`;
-
-      //   if (newPath !== currentPath) {
-      // console.log("x");
-      this.$router.push({
-        name: `searchedResults`,
-        query: { search: this.searchQuery },
-      });
+      if (this.$route.path !== "/searchedResults") {
+        this.$router.push({
+          name: `searchedResults`,
+          query: { search: this.searchQuery },
+        });
+      } else {
+        
+        this.$store.dispatch("getSearchedBooks", this.searchQuery);
+      }
     },
   },
   computed: {
@@ -149,5 +136,4 @@ export default {
 };
 </script>
 
-<style>
-</style>
+<style></style>

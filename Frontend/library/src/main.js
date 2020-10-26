@@ -17,7 +17,7 @@ router.beforeEach(({ path }, from, next) => {
     }
   }
   if (!publicPages.includes(path) && !privatePages.includes(path)) {
-    return next("/error404");
+    return next("/");
   }
 
   next();

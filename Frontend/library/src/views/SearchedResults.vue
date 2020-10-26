@@ -4,9 +4,8 @@
       <v-card-title> Searched books </v-card-title>
       <v-card-subtitle>
         {{ books.length }} books found with the term
-        <v-chip style="min-width: 3rem" class="ml-3 mr-3">
-          {{ $route.query.search }} </v-chip
-        >in it.</v-card-subtitle
+        <v-chip style="min-width: 3rem" class="ml-3 mr-3"> {{ $route.query.search }} </v-chip>in
+        it.</v-card-subtitle
       >
       <v-divider></v-divider>
 
@@ -31,6 +30,7 @@ export default {
   },
   beforeCreate() {
     const searchedTerm = this.$route.query.search;
+    console.log(searchedTerm)
     this.$store.dispatch("getSearchedBooks", searchedTerm);
   },
 
