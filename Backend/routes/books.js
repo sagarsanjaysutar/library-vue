@@ -7,7 +7,7 @@ const issueDays = 6;
 
 router.get("/books/newBooks", (req, res) => {
   console.group("Searching for new books.");
-  const newBooks = bookModel.find().limit(6);
+  const newBooks = bookModel.find().limit(4);
   newBooks
     .then((newBooks) => {
       if (newBooks) {

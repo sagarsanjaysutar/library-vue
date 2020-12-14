@@ -1,21 +1,20 @@
 <template>
-  <v-card
-    width="60rem"
-    height="35rem"
-    color="primary"
-    class="elevation-10"
-    style="overflow: hidden"
-  >
-    <v-toolbar color="primaryLight" elevation="10">
+  <span class="d-flex align-center" style="flex-direction:column">
+    <v-toolbar flat>
       <v-toolbar-title>Welcome {{ userInfo.name }} !</v-toolbar-title>
     </v-toolbar>
-    <v-tabs vertical background-color="primary" slider-color="primary lighten-5" slider-size="4">
+    <v-tabs
+      light
+      slider-color="primary lighten-5"
+      slider-size="4"
+      :style="isMobile() ? '' : 'width:60rem'"
+    >
       <v-tab> Issued Books </v-tab>
       <v-tab> Previous Readings </v-tab>
 
-      <v-tab-item class="pa-3 primary">
-        <v-card class="primary" elevation="5">
-          <v-toolbar class="primary" flat>
+      <v-tab-item class="pa-3 ">
+        <v-card light elevation="5">
+          <v-toolbar>
             <v-toolbar-title>
               Books
             </v-toolbar-title>
@@ -40,7 +39,6 @@
             :headers="headers.currentlyIssued"
             :items="currentlyIssuedBooks"
             :search="searchedBook"
-            class="primary "
             :items-per-page="5"
             hide-default-footer
           >
@@ -84,8 +82,8 @@
         </v-card>
       </v-tab-item>
       <v-tab-item>
-        <v-card class="primary" elevation="5">
-          <v-toolbar class="primary" flat>
+        <v-card light elevation="5">
+          <v-toolbar light flat>
             <v-toolbar-title>
               Books
             </v-toolbar-title>
@@ -110,7 +108,6 @@
             :headers="headers.previouslyIssued"
             :items="previouslyIssuedBooks"
             :search="searchedBook"
-            class="primary"
             :items-per-page="5"
             hide-default-footer
           >
@@ -153,7 +150,7 @@
         </v-card>
       </v-tab-item>
     </v-tabs>
-  </v-card>
+  </span>
 </template>
 
 <script>
@@ -183,6 +180,15 @@ export default {
     };
   },
   methods: {
+    isMobile() {
+      if (
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      ) {
+        return true;
+      } else {
+        return false;
+      }
+    },
     getBookDetails(b_id) {
       this.$store
         .dispatch("getSearchedBooks", b_id)

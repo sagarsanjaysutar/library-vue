@@ -4,10 +4,12 @@
       {{ status.value }}
     </v-snackbar>
     <navbar />
-
-    <v-container fluid style="background-color:#f6f6f6;" class="fill-height">
-      <router-view></router-view>
-    </v-container>
+    
+    <v-main>
+      <v-container fluid style="background-color:#f6f6f6;" class="fill-height">
+        <router-view></router-view>
+      </v-container>
+    </v-main>
   </v-app>
 </template>
 

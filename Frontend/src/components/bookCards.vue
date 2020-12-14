@@ -7,55 +7,75 @@
           <span style="width:60%">
             <v-card-title>{{ selectedBook.name }}</v-card-title>
             <v-card-subtitle>{{ selectedBook.author }} • {{ selectedBook.genere }}</v-card-subtitle>
-            <v-list color="light">
+            <v-list light dense>
               <v-list-item-group>
                 <v-list-item>
                   <v-list-item-content>
                     <v-list-item-title>ID</v-list-item-title>
                   </v-list-item-content>
-                  <v-list-item-text> {{ selectedBook.b_id }}</v-list-item-text>
+                  <v-list-item-content>
+                    <v-list-item-subtitle> {{ selectedBook.b_id }}</v-list-item-subtitle>
+                  </v-list-item-content>
                 </v-list-item>
                 <v-list-item>
                   <v-list-item-content class="d-flex">
                     <v-list-item-title>Location</v-list-item-title>
                   </v-list-item-content>
-                  <v-list-item-text> {{ selectedBook.location }}</v-list-item-text>
+                  <v-list-item-content>
+                    <v-list-item-subtitle> {{ selectedBook.location }}</v-list-item-subtitle>
+                  </v-list-item-content>
                 </v-list-item>
                 <v-list-item>
                   <v-list-item-content>
                     <v-list-item-title>Issued</v-list-item-title>
                   </v-list-item-content>
-                  <v-list-item-text>
-                    {{ selectedBook.issuedQuantity }} out of
-                    {{ selectedBook.totalQuantity }}</v-list-item-text
-                  >
+                  <v-list-item-content>
+                    <v-list-item-subtitle>
+                      {{ selectedBook.issuedQuantity }} out of {{ selectedBook.totalQuantity }}
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
                 </v-list-item>
               </v-list-item-group>
             </v-list>
             <v-card-actions class="d-flex justify-end ">
-              <v-btn class="light" @click="isBookDetailsOpen = false">Close</v-btn>
+              <v-btn color="red" outlined @click="isBookDetailsOpen = false">Close</v-btn>
             </v-card-actions>
           </span>
         </div>
       </v-card>
     </v-dialog>
     <v-row>
-      <v-col lg="2" xs="12" sm="12" md="3" cols="12" v-for="book in books" :key="book.id">
-        <v-card class="book-card elevation-1 light" light @click="showBookDetails(book.b_id)">
-          <v-img :src="book.coverPage" height="100%"> </v-img>
+      <v-col
+        lg="3"
+        xs="12"
+        sm="12"
+        md="3"
+        cols="12"
+        v-for="book in books"
+        :key="book.id"
+        class="d-flex justify-center"
+      >
+        <v-card class="book-card elevation-1" @click="showBookDetails(book.b_id)" outlined light>
+          <v-img :src="book.coverPage" height="70%"> </v-img>
+          <v-card-title style="max-width:90%" class="d-inline-block text-truncate"
+            ><v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <span v-bind="attrs" v-on="on"> {{ book.name }}</span>
+              </template>
+              <span>
+                {{ book.name }}
+              </span>
+            </v-tooltip></v-card-title
+          >
+          <v-card-subtitle class="d-inline-block text-truncate " style="max-width:90%"
+            ><v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <span v-bind="attrs" v-on="on"> {{ book.author }} • {{ book.genere }}</span>
+              </template>
+              <span>{{ book.author }} • {{ book.genere }} </span>
+            </v-tooltip>
+          </v-card-subtitle>
         </v-card>
-        <v-card-title
-          @click="showBookDetails(book.b_id)"
-          class="primary--text d-inline-block text-truncate pl-0 pb-1"
-          style="max-width: 12rem;"
-          >{{ book.name }}</v-card-title
-        >
-        <v-card-subtitle
-          @click="showBookDetails(book.b_id)"
-          class="primary--text d-inline-block text-truncate pl-0 pb-1"
-          style="max-width: 12rem;"
-          >{{ book.author }} • {{ book.genere }}
-        </v-card-subtitle>
       </v-col>
     </v-row>
   </span>
@@ -98,14 +118,8 @@ export default {
   justify-content: center;
 }
 .book-card {
-  max-width: 12rem;
-  height: 16rem;
-}
-
-@media only screen and (max-width: 480px) {
-  .book-card {
-    height: 18rem;
-  }
+  width: 13rem;
+  height: 20rem;
 }
 </style>
 

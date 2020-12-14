@@ -3,54 +3,49 @@
     <v-card-title v-text="isAddingBook ? 'Add book' : 'Edit book'"></v-card-title>
     <v-container>
       <v-row>
-        <v-col sm="12" lg="12">
+        <v-col sm="12" lg="12" cols="12">
           <v-text-field
             hide-details
             outlined
             label="Name"
             placeholder="Name"
             v-model="newBook.name"
-            color="white"
           ></v-text-field>
         </v-col>
-        <v-col sm="12" lg="6">
+        <v-col sm="12" lg="6" cols="12">
           <v-text-field
             hide-details
             outlined
             label="Author"
             placeholder="Author"
             v-model="newBook.author"
-            color="white"
           ></v-text-field>
         </v-col>
-        <v-col sm="12" lg="6">
+        <v-col sm="12" lg="6" cols="12">
           <v-text-field
             hide-details
             outlined
             label="Genere"
             placeholder="Genere"
             v-model="newBook.genere"
-            color="white"
           ></v-text-field>
         </v-col>
-        <v-col sm="12" lg="6">
+        <v-col sm="12" lg="6" cols="12">
           <v-text-field
             hide-details
             outlined
             label="Quantity"
             placeholder="Quantity"
             v-model="newBook.totalQuantity"
-            color="white"
           ></v-text-field
         ></v-col>
-        <v-col sm="12" lg="6">
+        <v-col sm="12" lg="6" cols="12">
           <v-text-field
             hide-details
             outlined
             label="Location"
             placeholder="Location"
             v-model="newBook.location"
-            color="white"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -60,7 +55,7 @@
       <v-btn @click="close()" text>
         <span>Cancel</span>
       </v-btn>
-      <v-btn color="red" @click="deleteBook(newBook.b_id)">
+      <v-btn color="danger" v-if="!isAddingBook" @click="deleteBook(newBook.b_id)">
         Delete
       </v-btn>
       <v-btn

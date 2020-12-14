@@ -128,6 +128,8 @@ export default {
       });
   },
   addBook({ commit }, book) {
+    book.coverPage =
+      "http://books.google.com/books/content?id=Hd5-722GEgAC&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api";
     axios
       .post("/book", book)
       .then((res) => {

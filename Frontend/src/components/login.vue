@@ -3,20 +3,24 @@
     <span v-if="showLogin">
       <v-card-title>Sign in</v-card-title>
       <v-card-subtitle>Log in to Library</v-card-subtitle>
-      <v-form class="ma-2 pa-3">
+      <v-form class="ma-2 pa-3" ref="loginForm" v-model="isLoginFormValid" lazy-validation>
         <v-text-field
+          required
           color="accent"
           outlined
           label="Email"
           placeholder="Email"
+          :rules="rules.email"
           v-model="email"
         ></v-text-field>
         <v-text-field
+          required
           color="accent"
           v-model="password"
           outlined
           label="Password"
           placeholder="Password"
+          :rules="rules.password"
           :type="showPassword ? 'text' : 'password'"
           :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
           @click:append="showPassword = !showPassword"
@@ -32,7 +36,7 @@
           >
             <span>Create account</span>
           </v-btn>
-          <v-btn class="accent" width="50%" @click="login">
+          <v-btn class="accent" width="50%" @click="login" :disabled="!isLoginFormValid">
             <span>Login</span>
           </v-btn>
         </v-card-actions>
@@ -51,7 +55,7 @@
       <v-card-title>Forgot your password?</v-card-title>
       <v-card-subtitle>No issues, enter your library Id.</v-card-subtitle>
       <v-form class="ma-2 pa-3">
-        <v-text-field color="accent" outlined label="ID" placeholder="ID"></v-text-field>
+        <v-text-field color="accent" outlined label="ID" placeholder="ID" required></v-text-field>
 
         <v-card-actions>
           <a
@@ -64,7 +68,7 @@
             >Sign in instead</a
           >
 
-          <v-btn class="accent" width="50%">
+          <v-btn class="accent" width="50%" @click="forgotPassword()">
             <span>Send password</span>
           </v-btn>
         </v-card-actions>
@@ -73,13 +77,15 @@
     <span v-if="showSignUp">
       <v-card-title>Sign up</v-card-title>
       <v-card-subtitle>Make a new account.</v-card-subtitle>
-      <v-form class="ma-2 pa-3">
+      <v-form class="ma-2 pa-3" ref="registerForm" v-model="isRegisterFormValid" lazy-validation>
         <v-text-field
           color="accent"
           v-model="name"
+          :rules="rules.name"
           outlined
           label="Name"
           placeholder="Name"
+          required
         ></v-text-field>
         <v-row>
           <v-col>
@@ -90,6 +96,7 @@
               outlined
               label="Email"
               placeholder="Email"
+              required
             ></v-text-field>
           </v-col>
           <v-col>
@@ -97,10 +104,12 @@
               v-model="role"
               solo
               :items="roles"
+              :rules="rules.role"
               label="Role"
               color="white"
               light
               background-color="white"
+              required
             ></v-overflow-btn>
           </v-col>
         </v-row>
@@ -117,6 +126,7 @@
               :type="showPassword ? 'text' : 'password'"
               :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
               @click:append="showPassword = !showPassword"
+              required
             ></v-text-field>
           </v-col>
           <v-col>
@@ -130,6 +140,7 @@
               :type="showPassword ? 'text' : 'password'"
               :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
               @click:append="showPassword = !showPassword"
+              required
             ></v-text-field>
           </v-col>
         </v-row>
@@ -145,7 +156,7 @@
             >Sign in instead</a
           >
 
-          <v-btn class="accent" width="50%" @click="createAccount">
+          <v-btn class="accent" width="50%" @click="createAccount" :disabled="!isRegisterFormValid">
             <span>Create account</span>
           </v-btn>
         </v-card-actions>
@@ -166,19 +177,22 @@ export default {
       password: "",
       confirmPassword: "",
       role: "",
+      isLoginFormValid: true,
+      isRegisterFormValid: true,
       showPassword: false,
       showLogin: true,
       showForgotPassword: false,
       showSignUp: false,
-      isUser: true,
       hasForgottenPassword: false,
       isCreatingAccount: false,
       roles: ["Student", "Employee"],
       rules: {
+        name: [(n) => !!n || "Name is required."],
         email: [
-          (v) => !!v || "E-mail is required",
-          (v) => /.+@.+/.test(v) || "E-mail must be valid",
+          (v) => !!v || "E-mail is required.",
+          (v) => /.+@.+/.test(v) || "E-mail must be valid.",
         ],
+        role: [(r) => !!r || "Role is required."],
         password: [
           (p) => !!p || "Password is required",
           // (p) => /.+@.+/.test(p) || "Please enter valid password.",
@@ -189,31 +203,47 @@ export default {
     };
   },
   methods: {
+    clearInput() {
+      this.name = "";
+      this.id = "";
+      this.email = "";
+      this.password = "";
+      this.confirmPassword = "";
+    },
     login() {
-      this.$emit("close", true);
-      const { email, password } = this;
-      this.$store
-        .dispatch("login", { email, password })
-        .then((status) => {
-          if (status === 200) {
-            this.$router.push({ name: "dashboard" });
-          }
-        })
-        .catch((err) => {
-          this.$store.commit("setStatus", err.response.data);
-        });
+      if (this.$refs.loginForm.validate()) {
+        this.$emit("showLogin", false);
+        const { email, password } = this;
+        this.$store
+          .dispatch("login", { email, password })
+          .then((status) => {
+            if (status === 200) {
+              this.$router.push({ name: "dashboard" });
+            }
+          })
+          .catch((err) => {
+            this.$store.commit("setStatus", err.response.data);
+          });
+        this.clearInput();
+      }
+    },
+    forgotPassword() {
+      this.$emit("showLogin", false);
     },
     createAccount() {
-      this.$emit("close", true);
-      this.showSignUp = false;
-      const userInfo = {
-        name: this.name,
-        id: this.id,
-        email: this.email,
-        password: this.password,
-        type: this.role,
-      };
-      this.$store.dispatch("register", userInfo);
+      if (this.$refs.registerForm.validate()) {
+        this.$emit("showLogin", false);
+        this.showSignUp = false;
+        const userInfo = {
+          name: this.name,
+          id: this.id,
+          email: this.email,
+          password: this.password,
+          type: this.role,
+        };
+        this.$store.dispatch("register", userInfo);
+        this.clearInput();
+      }
     },
   },
   computed: {
