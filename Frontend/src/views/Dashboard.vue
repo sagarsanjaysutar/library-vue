@@ -1,7 +1,7 @@
 <template>
   <span style="width: 100%; height:100%">
-    <student v-if="userInfo.type === 'Student'" />
-    <employee v-if="userInfo.type === 'Employee'" />
+    <student v-if="userInfo.type === 'Student' || userInfo.type === 'student'" />
+    <employee v-if="userInfo.type === 'Employee' || userInfo.type === 'employee'" />
   </span>
 </template>
 

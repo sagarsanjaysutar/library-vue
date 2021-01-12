@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"library.usermodels"},{"v":2,"unique":true,"key":{"email":1},"name":"email_1","ns":"library.usermodels","background":true},{"v":2,"unique":true,"key":{"u_id":1},"name":"u_id_1","ns":"library.usermodels","background":true}],"uuid":"32ab2b5efa1f44e1ace2aa2f38c79678"}
