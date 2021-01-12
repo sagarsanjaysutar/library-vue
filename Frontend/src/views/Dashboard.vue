@@ -1,5 +1,5 @@
 <template>
-  <span style="width: 100%; height:100%">
+  <span class="dashboard">
     <student v-if="userInfo.type === 'Student' || userInfo.type === 'student'" />
     <employee v-if="userInfo.type === 'Employee' || userInfo.type === 'employee'" />
   </span>
@@ -23,4 +23,10 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.dashboard {
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+}
+</style>

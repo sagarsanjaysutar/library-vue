@@ -4,9 +4,9 @@
       {{ status.value }}
     </v-snackbar>
     <navbar />
-    
+
     <v-main>
-      <v-container fluid style="background-color:#f6f6f6;" class="fill-height">
+      <v-container fluid class="fill-height">
         <router-view></router-view>
       </v-container>
     </v-main>

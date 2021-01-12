@@ -3,12 +3,7 @@
     <v-toolbar flat>
       <v-toolbar-title>Welcome {{ userInfo.name }} !</v-toolbar-title>
     </v-toolbar>
-    <v-tabs
-      light
-      slider-color="primary lighten-5"
-      slider-size="4"
-      :style="isMobile() ? '' : 'width:60rem'"
-    >
+    <v-tabs light slider-color="primary lighten-5" slider-size="4" :style="isMobile() ? '' : 'width:60rem'">
       <v-tab> Issued Books </v-tab>
       <v-tab> Previous Readings </v-tab>
 
@@ -20,44 +15,22 @@
             </v-toolbar-title>
             <v-spacer></v-spacer>
 
-            <v-text-field
-              dense
-              hide-details
-              v-model="searchedBook"
-              background-color="primaryLight"
-              solo
-              outlined
-              placeholder="Search books"
-            >
+            <v-text-field dense hide-details v-model="searchedBook" background-color="primaryLight" solo outlined placeholder="Search books">
               <template v-slot:append>
                 <v-btn icon class="mr-2"><v-icon>mdi-magnify</v-icon></v-btn>
               </template>
             </v-text-field>
           </v-toolbar>
           <v-card-subtitle>Currently issued books.</v-card-subtitle>
-          <v-data-table
-            :headers="headers.currentlyIssued"
-            :items="currentlyIssuedBooks"
-            :search="searchedBook"
-            :items-per-page="5"
-            hide-default-footer
-          >
+          <v-data-table :headers="headers.currentlyIssued" :items="currentlyIssuedBooks" :search="searchedBook" :items-per-page="5" hide-default-footer>
             <template v-slot:top="{ pagination, options, updateOptions }">
-              <v-data-footer
-                :pagination="pagination"
-                :options="options"
-                @update:options="updateOptions"
-                items-per-page-text=""
-                :items-per-page-options="[3]"
-              />
+              <v-data-footer :pagination="pagination" :options="options" @update:options="updateOptions" items-per-page-text="" :items-per-page-options="[3]" />
             </template>
             <template v-slot:item.name="{ item }">
-              <v-list-item class="d-flex">
+              <v-list-item class="text-truncate" style="max-width:50%">
                 <v-list-item-content>
                   <v-list-item-title> {{ item.name }}</v-list-item-title>
-                  <v-list-item-subtitle
-                    >{{ item.author }} • {{ item.genere }}
-                  </v-list-item-subtitle>
+                  <v-list-item-subtitle>{{ item.author }} • {{ item.genere }} </v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
             </template>
@@ -89,44 +62,23 @@
             </v-toolbar-title>
             <v-spacer></v-spacer>
 
-            <v-text-field
-              dense
-              hide-details
-              v-model="searchedBook"
-              background-color="primaryLight"
-              solo
-              outlined
-              placeholder="Search books"
-            >
+            <v-text-field dense hide-details v-model="searchedBook" background-color="primaryLight" solo outlined placeholder="Search books">
               <template v-slot:append>
                 <v-btn icon class="mr-2"><v-icon>mdi-magnify</v-icon></v-btn>
               </template>
             </v-text-field>
           </v-toolbar>
           <v-card-subtitle>Previously issued books.</v-card-subtitle>
-          <v-data-table
-            :headers="headers.previouslyIssued"
-            :items="previouslyIssuedBooks"
-            :search="searchedBook"
-            :items-per-page="5"
-            hide-default-footer
-          >
+
+          <v-data-table :headers="headers.previouslyIssued" :items="previouslyIssuedBooks" :search="searchedBook" :items-per-page="5" hide-default-footer>
             <template v-slot:top="{ pagination, options, updateOptions }">
-              <v-data-footer
-                :pagination="pagination"
-                :options="options"
-                @update:options="updateOptions"
-                items-per-page-text=""
-                :items-per-page-options="[5]"
-              />
+              <v-data-footer :pagination="pagination" :options="options" @update:options="updateOptions" items-per-page-text="" :items-per-page-options="[5]" />
             </template>
             <template v-slot:item.name="{ item }">
-              <v-list-item class="d-flex">
+              <v-list-item class="text-truncate" style="max-width:50%">
                 <v-list-item-content>
                   <v-list-item-title> {{ item.name }}</v-list-item-title>
-                  <v-list-item-subtitle
-                    >{{ item.author }} • {{ item.genere }}
-                  </v-list-item-subtitle>
+                  <v-list-item-subtitle>{{ item.author }} • {{ item.genere }} </v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
             </template>
@@ -180,15 +132,6 @@ export default {
     };
   },
   methods: {
-    isMobile() {
-      if (
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-      ) {
-        return true;
-      } else {
-        return false;
-      }
-    },
     getBookDetails(b_id) {
       this.$store
         .dispatch("getSearchedBooks", b_id)

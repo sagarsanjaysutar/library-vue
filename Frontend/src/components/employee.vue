@@ -1,5 +1,5 @@
 <template>
-  <span class="d-flex align-center" style="flex-direction:column">
+  <span class="d-flex align-center white" style="flex-direction:column">
     <v-dialog v-model="isDeleteDialogOpen" persistent max-width="30rem">
       <v-card light>
         <v-card-title class="mb-1">Delete this book?</v-card-title>
@@ -174,13 +174,7 @@ export default {
     };
   },
   methods: {
-    isMobile() {
-      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-        return true;
-      } else {
-        return false;
-      }
-    },
+   
     issueBook() {
       const issueInfo = {
         b_id: this.b_id,

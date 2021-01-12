@@ -17,7 +17,9 @@
       <v-app-bar-nav-icon color="white" to="/">
         <v-icon color="primary">mdi-book-open-variant</v-icon>
       </v-app-bar-nav-icon>
-
+      <span v-if="$store.state.userInfo.type">
+        {{ $store.state.userInfo.type.toLowerCase() === "employee" ? "Employee Dashboard" : "Student Dashboard" }}
+      </span>
       <v-spacer></v-spacer>
       <v-text-field
         light
@@ -48,9 +50,7 @@
                   <v-img :src="selfURL"></v-img>
                 </v-list-item-avatar>
                 <v-list-item-content>
-                  <v-list-item-title class="title"
-                    >{{ $store.state.userInfo.name }}
-                  </v-list-item-title>
+                  <v-list-item-title class="title">{{ $store.state.userInfo.name }} </v-list-item-title>
                   <v-list-item-subtitle>{{ $store.state.userInfo.email }} </v-list-item-subtitle>
                   <v-list-item-subtitle>{{ $store.state.userInfo.type }}</v-list-item-subtitle>
                 </v-list-item-content>
@@ -100,8 +100,7 @@ export default {
     showLogin: false,
     searchQuery: "",
 
-    selfURL:
-      "https://avatars1.githubusercontent.com/u/41800823?s=400&u=5fdcc5d13d3eb316bb4d8aebdda4b5ca3b93a90f&v=4",
+    selfURL: "https://avatars1.githubusercontent.com/u/41800823?s=400&u=5fdcc5d13d3eb316bb4d8aebdda4b5ca3b93a90f&v=4",
   }),
   methods: {
     logout() {
